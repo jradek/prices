@@ -56,7 +56,6 @@ class Database:
     def commit(self):
         self._session.commit()
 
-
     def insert_items(self, items: dict):
         ins = item_tbl.insert()
 
