@@ -94,7 +94,8 @@ def read_prices() -> pd.DataFrame:
     )
     # print(df.head())
     df = df.apply(remove_euro, axis=1)
-    # print(df.head())
+    df = df.round(2)
+    print(df.head())
     return df
 
 
