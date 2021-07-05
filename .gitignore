@@ -1,4 +1,5 @@
 .venv/
 data/
+page/
 
-*.sqlite3
+*.db

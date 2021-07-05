@@ -95,7 +95,7 @@ def read_prices() -> pd.DataFrame:
     # print(df.head())
     df = df.apply(remove_euro, axis=1)
     df = df.round(2)
-    print(df.head())
+    # print(df.head())
     return df
 
 
@@ -137,7 +137,7 @@ def relate_items_to_prices(prices: pd.DataFrame, items: dict) -> pd.DataFrame:
     df = prices.copy()
     df["item_id"] = item_ids
     df = df.drop(columns="description")
-    print(df.head())
+    # print(df.head())
     return df
 
 
@@ -147,7 +147,7 @@ def main():
     prices_df = read_prices()
     related_df = relate_items_to_prices(prices_df, items)
 
-    db = Database("prices.sqlite3")
+    db = Database("prices.db")
     db.create_tables()
 
     related_df.to_sql("discount", db.get_connection(), if_exists="replace", index=False)
