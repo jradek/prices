@@ -20,9 +20,9 @@ discount_tbl = sqa.Table(
     sqa.Column("start", sqa.Text),
     sqa.Column("end", sqa.Text),
     sqa.Column("store", sqa.Text),
-    sqa.Column("num_servings", sqa.Text),
+    sqa.Column("amount", sqa.Integer), # according to item unit
     sqa.Column("item_id", sqa.Integer),
-    sqa.Column("price", sqa.Float),
+    sqa.Column("price_cent", sqa.Integer), # in cent
 )
 
 item_tbl = sqa.Table(
@@ -30,7 +30,7 @@ item_tbl = sqa.Table(
     metadata,
     sqa.Column("id", sqa.Integer, primary_key=True),
     sqa.Column("name", sqa.Text),
-    sqa.Column("serving_size", sqa.Float),
+    sqa.Column("serving_size", sqa.Integer),
     sqa.Column("unit", sqa.Text),
     sqa.Column("category", sqa.Text),
 )
@@ -60,13 +60,30 @@ class Database:
         ins = item_tbl.insert()
 
         for k, v in items.items():
+            unit = ""
+            serving_size = ""
+            if v["unit"] == "g":
+                unit = "g"
+                serving_size = "100"
+            elif v["unit"] == "l":
+                unit = "ml"
+                serving_size = "1000"
+            elif v["unit"] == "ml":
+                unit = "ml"
+                serving_size = "100"
+            elif v["unit"] == "Stueck":
+                unit = "Stueck"
+                serving_size = "1"
+            else:
+                raise Exception(f"Unknwon serving size {v['unit']}")
+
             self._session.execute(
                 ins,
                 {
                     "id": v["id"],
                     "name": v["name"],
-                    "serving_size": v["serving_size"],
-                    "unit": v["unit"],
+                    "serving_size": serving_size,
+                    "unit": unit,
                     "category": v["category"],
                 },
             )
@@ -92,9 +109,7 @@ def read_prices() -> pd.DataFrame:
     df = df.rename(
         columns={"num servings": "num_servings", "from": "start", "until": "end"}
     )
-    # print(df.head())
     df = df.apply(remove_euro, axis=1)
-    df = df.round(2)
     # print(df.head())
     return df
 
@@ -127,16 +142,34 @@ def items_to_dict(items_df: pd.DataFrame) -> dict:
 
 def relate_items_to_prices(prices: pd.DataFrame, items: dict) -> pd.DataFrame:
     item_ids = []
+    multipliers = []
     for row in prices.itertuples():
         desc = row[3]
         if desc not in items:
             raise Exception(f"could not find {desc}")
 
-        item_ids.append(items[desc]["id"])
+        item = items[desc]
+        item_ids.append(item["id"])
+
+        if item["unit"] == "g":
+            multipliers.append(100)
+        elif item["unit"] == "ml":
+            multipliers.append(100)
+        elif item["unit"] == "l":
+            multipliers.append(1000)
+        elif item["unit"] == "Stueck":
+            multipliers.append(1)
+        else:
+            raise Exception(f"Unknown serving size {item['unit']}")
 
     df = prices.copy()
     df["item_id"] = item_ids
-    df = df.drop(columns="description")
+    df["mult"] = multipliers
+    df["amount"] = df["num_servings"] * df["mult"]
+    df["price_cent"] = df["price"] * 100
+    df.amount = df.amount.astype(int)
+    df.price_cent = df.price_cent.astype(int)
+    df = df.drop(columns=["description", "mult", "num_servings", "price"])
     # print(df.head())
     return df
 

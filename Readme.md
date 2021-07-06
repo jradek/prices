@@ -9,12 +9,12 @@ select
 	d.end,
 	d.store,
 	i.name,
-	d.num_servings,
-	d.price,
-	i.serving_size * d.num_servings as "total servings",
+	d.amount,
+	d.price_cent,
 	i.unit,
-	round(d.price/ d.num_servings, 2) as "price per serving",
-	i.category
+	i.serving_size,
+	i.category,
+	round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) as "price per serving [EUR}"
 from discount d
 join item i on i.id = d.item_id
 ```
