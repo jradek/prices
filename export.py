@@ -29,23 +29,32 @@ SELECT
 	i.serving_size,
 	i.category,
 	round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) AS "price_per_serving",
-	min_store,
-	min_start,
-	min_price_per_serving AS "min_price_per_serving"
+	min_price.store as "min_store",
+	min_price.start as "min_start",
+	min_price.price_per_serving as "min_price_per_serving",
+	measures.num_measures
 FROM discount d
 JOIN item i ON i.id = d.item_id
 JOIN (SELECT
-		i.id AS "min_item_id",
-		d.store AS "min_store",
-		d.start AS "min_start",
-		round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) AS "min_price_per_serving"
+		i.id ,
+		d.store,
+		d.start,
+		round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) AS "price_per_serving"
 	FROM discount d
 	JOIN item i on i.id = d.item_id
 	GROUP BY i.id
 	HAVING MIN(round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2))
-) 
+) AS min_price
+JOIN (SELECT
+		i.id,
+		count(*) as num_measures
+	  FROM discount d
+	  JOIN item i on i.id = d.item_id
+	  GROUP BY i.id
+) AS measures
 WHERE '{date}' <= d.end
-   AND min_item_id = i.id
+   AND min_price.id = i.id
+   and measures.id = i.id
 ORDER BY d.store, d.start
     """
 
