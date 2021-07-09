@@ -32,6 +32,15 @@ item_tbl = sqa.Table(
 
 
 class Database:
+
+    # conversion from "old" to "new" units (i.e. without floating point)
+    UNIT_CONVERSION = {
+        "g": {"new": "g", "serving_size": 100,},
+        "l": {"new": "ml", "serving_size": 1000,},
+        "ml": {"new": "ml", "serving_size": 100,},
+        "Stueck": {"new": "Stueck", "serving_size": 1},
+    }
+
     def __init__(self, database_file_path: Path) -> None:
         self._database_file_path = database_file_path
 
@@ -55,30 +64,15 @@ class Database:
         ins = item_tbl.insert()
 
         for k, v in items.items():
-            unit = ""
-            serving_size = ""
-            if v["unit"] == "g":
-                unit = "g"
-                serving_size = "100"
-            elif v["unit"] == "l":
-                unit = "ml"
-                serving_size = "1000"
-            elif v["unit"] == "ml":
-                unit = "ml"
-                serving_size = "100"
-            elif v["unit"] == "Stueck":
-                unit = "Stueck"
-                serving_size = "1"
-            else:
-                raise Exception(f"Unknwon serving size {v['unit']}")
+            converted_unit = Database.UNIT_CONVERSION[v["unit"]]
 
             self._session.execute(
                 ins,
                 {
                     "id": v["id"],
                     "name": v["name"],
-                    "serving_size": serving_size,
-                    "unit": unit,
+                    "serving_size": converted_unit["serving_size"],
+                    "unit": converted_unit["new"],
                     "category": v["category"],
                 },
             )
