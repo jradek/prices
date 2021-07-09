@@ -37,16 +37,18 @@ def read_items() -> pd.DataFrame:
 
 def items_to_dict(items_df: pd.DataFrame) -> dict:
     items = dict()
-    for idx, row in enumerate(items_df.itertuples()):
+    for row in items_df.itertuples():
+        # print(row)
         desc = row[1]
         item = {
             "desc": desc,
-            "id": idx,
+            "id": row[2],
             "name": row[3],
             "serving_size": row[4],
             "unit": row[5],
             "category": row[6],
         }
+        # print(item)
         items[desc] = item
 
     return items
