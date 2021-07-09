@@ -6,7 +6,7 @@ import pandas as pd
 
 import price_db
 
-DATA_DIR = Path(__file__).absolute().parent / "data"
+DATA_DIR = Path(__file__).absolute().parent / "google_export"
 
 LOGGER = logging.getLogger("Google Import")
 
@@ -87,7 +87,8 @@ def relate_items_to_prices(prices: pd.DataFrame, items: dict) -> pd.DataFrame:
     df.amount = df.amount.astype(int)
     df.price_cent = df.price_cent.astype(int)
     df = df.drop(columns=["description", "mult", "num_servings", "price"])
-    # print(df.head())
+
+    df = df.sort_values(by=["start", "store"]).reset_index(drop=True)
     return df
 
 
@@ -100,7 +101,13 @@ def main():
     db = price_db.Database("prices.db")
     db.create_tables()
 
-    related_df.to_sql("discount", db.get_connection(), if_exists="replace", index=False)
+    related_df.to_sql(
+        "discount",
+        db.get_connection(),
+        if_exists="append",
+        index=True,
+        index_label="id",
+    )
     db.commit()
     db.insert_items(items)
 

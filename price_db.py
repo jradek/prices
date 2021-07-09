@@ -11,13 +11,13 @@ metadata = sqa.MetaData()
 discount_tbl = sqa.Table(
     "discount",
     metadata,
-    sqa.Column("id", sqa.Integer, primary_key=True, autoincrement=True),
+    sqa.Column("id", sqa.Integer, primary_key=True),
     sqa.Column("start", sqa.Text),
     sqa.Column("end", sqa.Text),
     sqa.Column("store", sqa.Text),
     sqa.Column("amount", sqa.Integer),  # according to item unit
     sqa.Column("item_id", sqa.Integer),
-    sqa.Column("price_cent", sqa.Integer),  # in cent
+    sqa.Column("price_cent", sqa.Integer),
 )
 
 item_tbl = sqa.Table(
