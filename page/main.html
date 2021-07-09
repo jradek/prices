@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <!--Import Google Icon Font-->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <!-- START Page Content -->
+      <h1>Current Offers</h1>
+
+      <div class="row center">
+        <div class="col s12">
+          <form action="#" id="predefinedSortForm">
+            <fieldset>
+              <legend>Predefined sort options</legend>
+              <p class="s6">
+                <div class="row">
+                  <div class="col s6">
+                    <label>
+                      <input
+                        name="sortRadioGroup"
+                        type="radio"
+                        value="store-date-product"
+                      />
+                      <span class="black-text">Store - Date - Product</span>
+                    </label>
+                  </div>
+                  <div class="col s6">
+                    <label>
+                      <input
+                        name="sortRadioGroup"
+                        type="radio"
+                        value="date-product-price"
+                      />
+                      <span class="black-text">Date - Product - Price/Serving</span>
+                    </label>
+                  </div>
+                </div> <!-- row -->
+                <div class="row">
+                  <div class="col s6">
+                    <label>
+                      <input
+                        name="sortRadioGroup"
+                        type="radio"
+                        value="product-price"
+                      />
+                      <span class="black-text">Product - Price/Serving</span>
+                    </label>
+                  </div>
+                  <div class="col s6">
+                    <label>
+                      <input
+                        name="sortRadioGroup"
+                        type="radio"
+                        value="category-product-price"
+                      />
+                      <span class="black-text"
+                        >Category - Product - Price/Serving</span
+                      >
+                    </label>
+                  </div>
+                </div> <!-- row -->
+              </p>
+            </fieldset>
+          </form>
+        </div>
+      </div>
+
+      <ul id="root"></ul>
+      <!-- END Page Content -->
+    </div>
+
+    <!-- <?!= include("data-js"); ?> -->
+    <script src="data.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        processData();
+      });
+
+      function processData() {
+        var root = document.getElementById("root");
+
+        const rows = g_offers.map((it) => {
+          return `<li>${it[0]}, ${it[1]}, ${it[2]}, ${it[3]}, ${it[4]}</li>`;
+        });
+
+        root.innerHTML = rows.join(" ");
+      }
+    </script>
+  </body>
+</html>

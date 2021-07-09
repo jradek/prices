@@ -13,12 +13,42 @@ pd.set_option("display.max_colwidth", None)
 CURRENT_DIR = Path(__file__).absolute().parent
 
 
+def write_javascript(offers_df: pd.DataFrame):
+    fn = CURRENT_DIR / "page" / "data.js"
+    fn.parent.mkdir(exist_ok=True, parents=True)
+
+    with open(fn, "w") as fp:
+        fp.write("// <script>\n\n")
+        fp.write("g_offers = [\n")
+
+        for row in offers_df.iterrows():
+            row_idx = row[0]
+            series = row[1]
+
+            if row_idx == 0:
+                line = ", ".join(
+                    [f"{idx}: {val}" for idx, val in enumerate(series.index)]
+                )
+                fp.write(f"// {line}\n")
+
+            items = []
+            for val in series:
+                if isinstance(val, str):
+                    items.append(f'"{val}"')
+                else:
+                    items.append(str(val))
+            fp.write(f'\t[{", ".join(items)}],\n')
+
+        fp.write("]; // offers\n\n")
+        fp.write("// </script>\n\n")
+
+
 def get_offers(db: price_db.Database, today=None) -> pd.DataFrame:
     today = datetime.date.today() if today == None else today
     date = today.strftime("%Y-%m-%d")
 
     stmt = f"""
-SELECT 
+SELECT
      calc.*,
      min_price.min_store,
      min_price.min_start,
@@ -28,10 +58,10 @@ SELECT
 FROM (SELECT
      d."start",
      d."end",
-     STRFTIME('%s', d.end) - STRFTIME('%s', d.start) <= 2 * 24 * 3600 AS "is_short", 
+     STRFTIME('%s', d.end) - STRFTIME('%s', d.start) <= 2 * 24 * 3600 AS "is_short",
      d.store,
      i.name,
-     i.id,
+     i.id AS item_id,
      d.amount,
      d.price_cent,
      i.unit,
@@ -59,25 +89,19 @@ JOIN (SELECT
      GROUP BY i.id
 ) AS measures
 WHERE "{date}" < calc."end"
-  AND min_price.id = calc.id
-  AND measures.id = calc.id
-ORDER BY calc.store, calc."start"
+  AND min_price.id = calc.item_id
+  AND measures.id = calc.item_id
+ORDER BY calc.store, calc."start", calc.name
     """
 
-    def to_date(r):
-        return datetime.datetime.strptime(r, "%Y-%m-%d")
-
     df = pd.read_sql(stmt, db.get_connection())
-    # deal if less than 5% above min price
-    # df["is_deal"] = df["price_per_serving"] <= df["min_price_per_serving"] * 1.05
-    # short if less than 2 days
-    # df["is_short"] = df["end"].map(to_date) - df["start"].map(to_date) <= "2 days"
-    print(df)
+    return df
 
 
 def main():
     db = price_db.Database(CURRENT_DIR / "prices.db")
-    print(get_offers(db))
+    offers_df = get_offers(db)
+    write_javascript(offers_df)
 
 
 if __name__ == "__main__":

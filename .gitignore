@@ -1,6 +1,7 @@
 .venv/
 __pycache__/
-data/
-page/
+
+google_export/
+page/data.js
 
 *.db
