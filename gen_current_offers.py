@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 import datetime
 
 from pathlib import Path
@@ -38,7 +40,7 @@ def _format_store_color(store: str) -> str:
 
 
 def write_javascript(offers_df: pd.DataFrame, stores: typing.List[str]):
-    fn = CURRENT_DIR / "page" / "data.js"
+    fn = CURRENT_DIR / "page" / "current_offers_data.js"
     fn.parent.mkdir(exist_ok=True, parents=True)
 
     with open(fn, "w") as fp:
@@ -138,7 +140,7 @@ ORDER BY calc.store, calc."start", calc.name
 
 
 def main():
-    db = price_db.Database(CURRENT_DIR / "prices.db")
+    db = price_db.Database(CURRENT_DIR / "tmp" / "prices.db")
     offers_df = get_offers(db)
     stores = get_stores(db)
     write_javascript(offers_df, stores)

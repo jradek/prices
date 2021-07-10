@@ -2,6 +2,5 @@
 __pycache__/
 
 google_export/
-page/data.js
-
-*.db
+page/current_offers_data.js
+tmp/

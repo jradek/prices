@@ -1,4 +1,5 @@
-import pprint
+#! /usr/bin/env python3
+
 import logging
 from pathlib import Path
 
@@ -89,7 +90,9 @@ def main():
     prices_df = read_prices()
     related_df = relate_items_to_prices(prices_df, items)
 
-    fn = Path("prices.db")
+    fn = Path("tmp") / "prices.db"
+    fn.parent.mkdir(exist_ok=True, parents=True)
+
     if fn.exists:
         LOGGER.warning("Removing %s" % fn)
         fn.unlink()

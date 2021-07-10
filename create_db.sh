@@ -1,3 +1,4 @@
 #! /usr/bin/env sh
 
-sqlite3 prices.db < prices.sql
+mkdir -p tmp
+sqlite3 tmp/prices.db < prices.sql
