@@ -61,6 +61,7 @@ function buildRow(row, todayString) {
   const isDeal = row[15] == 1;
   const priceDiff = price_per_serving - min_price_per_serving;
   const dayName = getDayName(start);
+  const storeColors = g_storeToColor[store];
 
   var dealClasses = "";
   if (isDeal) {
@@ -91,7 +92,9 @@ function buildRow(row, todayString) {
 </td>
 <td style="padding: 0px 5px !important;"><i class="${categoryClasses}"></i></td>
 <td>${item}</td>
-<td><div class="chip">${store}</div></td>
+<td><span class="${storeColors[1]} ${
+    storeColors[2]
+  }" style="padding: 2px 5px">${store}</span></td>
 <td>${amount} ${unit}</td>
 <td>${price}&euro;</td>
 <td style="font-size: x-small">
