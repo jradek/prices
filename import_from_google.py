@@ -89,7 +89,12 @@ def main():
     prices_df = read_prices()
     related_df = relate_items_to_prices(prices_df, items)
 
-    db = price_db.Database("prices.db")
+    fn = Path("prices.db")
+    if fn.exists:
+        LOGGER.warning("Removing %s" % fn)
+        fn.unlink()
+
+    db = price_db.Database(fn)
     db.create_tables()
 
     related_df.to_sql(
