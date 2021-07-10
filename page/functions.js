@@ -1,3 +1,5 @@
+// <script>
+
 const g_categories = {
   brandy: "fas fa-wine-glass-alt",
   cake: "fas fa-birthday-cake",
@@ -18,30 +20,84 @@ const g_categories = {
   whiskey: "fas fa-glass-whiskey",
 };
 
-function populateTable() {
-  console.log("works");
+/////////////////////////////////////////////////////////////////////////////
+// SORTING
+/////////////////////////////////////////////////////////////////////////////
+
+const g_sortOptionToDataColumnIds = {
+  // store, start date, name, price per serving
+  store: [3, 0, 4, 11],
+  // start date, name, price per serving
+  date: [0, 4,  11],
+  // name, price per serving, store
+  product: [4, 11, 3],
+  // category, name, price per serving
+  category: [10, 4, ]
+}
+
+/**
+sort array of arrays `data` by sort columns
+the sort columns are the indexes of the sub arrays, e.g. [1,0,2]
+*/
+function sortArrayOfArrays(data, sortColumns) {
+  // first: duplicate clone teh data
+  let result = JSON.parse(JSON.stringify(data));
+
+  // assemble sort function
+  let sortFunction = (a, b) => {
+    for (let i in sortColumns) {
+      const idx = sortColumns[i];
+
+      if (a[idx] < b[idx]) return -1;
+      if (a[idx] > b[idx]) return 1;
+    }
+    return 0;
+  };
+
+  return result.sort(sortFunction);
+}
+
+function getRadioValue(form, name) {
+  var val = null;
+  // get list of radio buttons with specified name
+  var radios = form.elements[name];
+
+  // loop through list of radio buttons
+  for (var i = 0, len = radios.length; i < len; i++) {
+    if (radios[i].checked) {
+      // radio checked?
+      val = radios[i].value; // if so, hold its value in val
+      break; // and break out of for loop
+    }
+  }
+  return val; // return value of checked radio or undefined if none checked
+}
+
+function sortDataCallback() {
+  const sortForm = document.getElementById("predefinedSortForm");
+  const sortOption = getRadioValue(sortForm, "sortRadioGroup");
+
+  if (sortOption == null) {
+    return;
+  }
+
+  const sortColumns = g_sortOptionToDataColumnIds[sortOption];
+  const result = sortArrayOfArrays(g_offers, sortColumns);
+  generateTable(result);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// TABLE BUILDING
+/////////////////////////////////////////////////////////////////////////////
+
+function generateTable(offers) {
   var root = document.getElementById("table-body");
   const today = isoFormat(new Date());
-  const rows = g_offers.map((it) => {
+  const rows = offers.map((it) => {
     return buildRow(it, today);
   });
   root.innerHTML = rows.join(" ");
 }
-
-function getDayName(dateString) {
-  var date = new Date(dateString);
-  return date.toLocaleDateString("en-US", { weekday: "long" });
-}
-
-var getDateDiffInDays = function (date1, date2) {
-  dt1 = new Date(date1);
-  dt2 = new Date(date2);
-  return Math.floor(
-    (Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) -
-      Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate())) /
-      (1000 * 60 * 60 * 24)
-  );
-};
 
 function buildRow(row, todayString) {
   // console.log(row);
@@ -109,6 +165,10 @@ function buildRow(row, todayString) {
   </tr>`;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+// UTIL
+/////////////////////////////////////////////////////////////////////////////
+
 function isoFormat(date) {
   var mm = date.getMonth() + 1; // getMonth() is zero-based
   var dd = date.getDate();
@@ -119,3 +179,20 @@ function isoFormat(date) {
     (dd > 9 ? "" : "0") + dd,
   ].join("-");
 }
+
+function getDayName(dateString) {
+  var date = new Date(dateString);
+  return date.toLocaleDateString("en-US", { weekday: "long" });
+}
+
+var getDateDiffInDays = function (date1, date2) {
+  dt1 = new Date(date1);
+  dt2 = new Date(date2);
+  return Math.floor(
+    (Date.UTC(dt2.getFullYear(), dt2.getMonth(), dt2.getDate()) -
+      Date.UTC(dt1.getFullYear(), dt1.getMonth(), dt1.getDate())) /
+      (1000 * 60 * 60 * 24)
+  );
+};
+
+// </script>

@@ -56,9 +56,9 @@
                     <input
                       name="sortRadioGroup"
                       type="radio"
-                      value="store-date-product"
+                      value="store"
                     />
-                    <span class="black-text">Store - Date - Product</span>
+                    <span class="black-text">Store</span>
                   </label>
                 </div>
                 <div class="col s6">
@@ -66,10 +66,10 @@
                     <input
                       name="sortRadioGroup"
                       type="radio"
-                      value="date-product-price"
+                      value="date"
                     />
                     <span class="black-text"
-                      >Date - Product - Price/Serving</span
+                      >Date</span
                     >
                   </label>
                 </div>
@@ -81,9 +81,9 @@
                     <input
                       name="sortRadioGroup"
                       type="radio"
-                      value="product-price"
+                      value="product"
                     />
-                    <span class="black-text">Product - Price/Serving</span>
+                    <span class="black-text">Product</span>
                   </label>
                 </div>
                 <div class="col s6">
@@ -91,16 +91,24 @@
                     <input
                       name="sortRadioGroup"
                       type="radio"
-                      value="category-product-price"
+                      value="category"
                     />
                     <span class="black-text"
-                      >Category - Product - Price/Serving</span
+                      >Category</span
                     >
                   </label>
                 </div>
               </div>
             </fieldset>
           </form>
+        </div>
+      </div>
+
+      <div class="row center">
+        <div class="col s12 input-field">
+          <a id="sortBtn" class="waves-effect waves-light btn btn-large">
+            <i class="large material-icons right">sort</i>Sort</a
+          >
         </div>
       </div>
 
@@ -133,19 +141,15 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        // processData();
-        populateTable();
+        generateTable(g_offers);
+
+        // const sortForm = document.getElementById("predefinedSortForm");
+        // const elements = sortForm.elements["sortRadioGroup"];
+        // elements[0].checked = true;
       });
 
-      function processData() {
-        var root = document.getElementById("root");
+      document.getElementById("sortBtn").addEventListener("click", sortDataCallback);
 
-        const rows = g_offers.map((it) => {
-          return `<li>${it[0]}, ${it[1]}, ${it[2]}, ${it[3]}, ${it[4]}</li>`;
-        });
-
-        root.innerHTML = rows.join(" ");
-      }
     </script>
   </body>
 </html>
