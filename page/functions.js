@@ -58,14 +58,21 @@ function buildRow(row, todayString) {
   const category = row[10];
   const price_per_serving = row[11];
   const min_price_per_serving = row[14];
-  const isDeal = row[15] == 1;
+  // less than 5% per serving
+  const isDealPercent = row[15] == 1;
   const priceDiff = price_per_serving - min_price_per_serving;
+  // less than 5cents per serving (we use 0.06 due to rounding errors)
+  const isDealPerServing = priceDiff < 0.06;
   const dayName = getDayName(start);
   const storeColors = g_storeToColor[store];
 
   var dealClasses = "";
-  if (isDeal) {
+  if (isDealPercent) {
     dealClasses = "green lighten-5";
+  }
+
+  if (isDealPerServing && !isDealPercent) {
+    dealClasses = "yellow lighten-5";
   }
 
   var dayStyle = "font-weight: normal";
