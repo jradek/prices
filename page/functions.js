@@ -44,7 +44,7 @@ var getDateDiffInDays = function (date1, date2) {
 };
 
 function buildRow(row, todayString) {
-  console.log(row);
+  // console.log(row);
 
   const start = row[0];
   const end = row[1];
@@ -58,11 +58,9 @@ function buildRow(row, todayString) {
   const category = row[10];
   const price_per_serving = row[11];
   const min_price_per_serving = row[14];
-  // less than 5% per serving
   const isDealPercent = row[15] == 1;
   const priceDiff = price_per_serving - min_price_per_serving;
-  // less than 5cents per serving (we use 0.06 due to rounding errors)
-  const isDealPerServing = priceDiff < 0.06;
+  const isDealPerServing = row[16];
   const dayName = getDayName(start);
   const storeColors = g_storeToColor[store];
 
@@ -97,7 +95,7 @@ function buildRow(row, todayString) {
   <p style="${dayStyle}">${dayName} (${getDateDiffInDays(start, end) + 1})</p>
   <p style="font-size: x-small">${start}</p>
 </td>
-<td style="padding: 0px 5px !important;"><i class="${categoryClasses}"></i></td>
+<td><i class="${categoryClasses}"></i></td>
 <td>${item}</td>
 <td><span class="${storeColors[1]} ${
     storeColors[2]
