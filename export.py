@@ -24,10 +24,10 @@ _STORE_TO_COLOR = {
     "netto": ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
     "norma": ["#f57f17", "yellow darken-4", "white-text"],
     "penny": ["#c62828", "red darken-3", "white-text"],
-    "real": ["#fafafa", "grey lighten-5", "indigo-text text-darken-4"],
+    "real": ["#fffffff", "white", "indigo-text text-darken-4"],
     "rewe": ["#b71c1c", "red darken-4", "white-text"],
     "tegut": ["#e65100", "orange darken-4", "white-text"],
-    "thomas philipps": ["#fafafa", "grey lighten-5", "red-text text-darken-1"],
+    "thomas philipps": ["#ffffff", "white", "red-text text-darken-1"],
 }
 
 

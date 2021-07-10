@@ -90,16 +90,16 @@ function buildRow(row, todayString) {
   }
 
   return `<tr class="${dealClasses}">
-<td style="padding: 0px 5px !important;">${dateAvailableIcon}</td>
+<td>${dateAvailableIcon}</td>
 <td>
   <p style="${dayStyle}">${dayName} (${getDateDiffInDays(start, end) + 1})</p>
   <p style="font-size: x-small">${start}</p>
 </td>
 <td><i class="${categoryClasses}"></i></td>
 <td>${item}</td>
-<td><span class="${storeColors[1]} ${
+<td><span class="my-store-background ${storeColors[1]} ${
     storeColors[2]
-  }" style="padding: 2px 5px">${store}</span></td>
+  }">${store}</span></td>
 <td>${amount} ${unit}</td>
 <td>${price}&euro;</td>
 <td style="font-size: x-small">
