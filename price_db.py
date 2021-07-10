@@ -15,8 +15,8 @@ discount_tbl = sqa.Table(
     sqa.Column("start", sqa.Text),
     sqa.Column("end", sqa.Text),
     sqa.Column("store", sqa.Text),
-    sqa.Column("amount", sqa.Integer),  # according to item unit
     sqa.Column("item_id", sqa.Integer),
+    sqa.Column("amount", sqa.Integer),  # according to item unit
     sqa.Column("price_cent", sqa.Integer),
 )
 
@@ -35,9 +35,18 @@ class Database:
 
     # conversion from "old" to "new" units (i.e. without floating point)
     UNIT_CONVERSION = {
-        "g": {"new": "g", "serving_size": 100,},
-        "l": {"new": "ml", "serving_size": 1000,},
-        "ml": {"new": "ml", "serving_size": 100,},
+        "g": {
+            "new": "g",
+            "serving_size": 100,
+        },
+        "l": {
+            "new": "ml",
+            "serving_size": 1000,
+        },
+        "ml": {
+            "new": "ml",
+            "serving_size": 100,
+        },
         "Stueck": {"new": "Stueck", "serving_size": 1},
     }
 
