@@ -93,7 +93,7 @@ def main():
     fn = Path("tmp") / "prices.db"
     fn.parent.mkdir(exist_ok=True, parents=True)
 
-    if fn.exists:
+    if fn.exists():
         LOGGER.warning("Removing %s" % fn)
         fn.unlink()
 
