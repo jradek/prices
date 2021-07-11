@@ -46,6 +46,10 @@ def write_javascript(offers_df: pd.DataFrame, stores: typing.List[str]):
     with open(fn, "w") as fp:
         fp.write("// <script>\n\n")
 
+        # export time
+        export_date = datetime.datetime.now()
+        fp.write(f'g_exportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n')
+
         # stores
         lines = ",\n".join(map(_format_store_color, stores))
         fp.write("g_storeToColor = {\n")
