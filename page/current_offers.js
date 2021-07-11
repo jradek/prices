@@ -20,6 +20,23 @@ const g_categories = {
   whiskey: "fas fa-glass-whiskey",
 };
 
+g_storeToColor = {
+  // RBG, materialized name, text color
+  "aldi": ["#01579b", "light-blue darken-4", "white-text"],
+  "edeka": ["#ffff00", "yellow accent-2", "blue-text"],
+  "edeka sander": ["#ffff00", "yellow accent-2", "blue-text"],
+  "globus": ["#558b2f", "light-green darken-3", "black-text"],
+  "kaufland": ["#f44336", "red", "white-text"],
+  "lidl": ["#1976d2", "blue darken-2", "yellow-text"],
+  "netto": ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
+  "norma": ["#f57f17", "yellow darken-4", "white-text"],
+  "penny": ["#c62828", "red darken-3", "white-text"],
+  "real": ["#fffffff", "white", "indigo-text text-darken-4"],
+  "rewe": ["#b71c1c", "red darken-4", "white-text"],
+  "tegut": ["#e65100", "orange darken-4", "white-text"],
+  "thomas philipps": ["#ffffff", "white", "red-text text-darken-1"]
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // SORTING
 /////////////////////////////////////////////////////////////////////////////
@@ -101,7 +118,11 @@ function buildRow(row, todayString) {
   const priceDiff = price_per_serving - min_price_per_serving;
   const isDealPerServing = row[16];
   const dayName = getDayName(start);
-  const storeColors = g_storeToColor[store];
+  let storeColors = g_storeToColor[store];
+
+  if (storeColors === undefined) {
+    storeColors = ["#eceff1", "blue-grey lighten-5", "black-text"]
+  }
 
   // check if entry is still valid
   // this is necessary, because export may have been a long time ago

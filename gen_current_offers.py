@@ -15,31 +15,8 @@ pd.set_option("display.max_colwidth", None)
 
 CURRENT_DIR = Path(__file__).absolute().parent
 
-_STORE_TO_COLOR = {
-    # RBG, materialized name, text color
-    "aldi": ["#01579b", "light-blue darken-4", "white-text"],
-    "edeka": ["#ffff00", "yellow accent-2", "blue-text"],
-    "edeka sander": ["#ffff00", "yellow accent-2", "blue-text"],
-    "globus": ["#558b2f", "light-green darken-3", "black-text"],
-    "kaufland": ["#f44336", "red", "white-text"],
-    "lidl": ["#1976d2", "blue darken-2", "yellow-text"],
-    "netto": ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
-    "norma": ["#f57f17", "yellow darken-4", "white-text"],
-    "penny": ["#c62828", "red darken-3", "white-text"],
-    "real": ["#fffffff", "white", "indigo-text text-darken-4"],
-    "rewe": ["#b71c1c", "red darken-4", "white-text"],
-    "tegut": ["#e65100", "orange darken-4", "white-text"],
-    "thomas philipps": ["#ffffff", "white", "red-text text-darken-1"],
-}
 
-
-def _format_store_color(store: str) -> str:
-    missing = ["#eceff1", "blue-grey lighten-5", "black-text"]
-    colors = _STORE_TO_COLOR.get(store, missing)
-    return f'"{store}": ["' + '", "'.join(colors) + '"]'
-
-
-def write_javascript(offers_df: pd.DataFrame, stores: typing.List[str]):
+def write_javascript(offers_df: pd.DataFrame):
     fn = CURRENT_DIR / "page" / "current_offers_data.js"
     fn.parent.mkdir(exist_ok=True, parents=True)
 
@@ -50,12 +27,7 @@ def write_javascript(offers_df: pd.DataFrame, stores: typing.List[str]):
         export_date = datetime.datetime.now()
         fp.write(f'g_exportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n')
 
-        # stores
-        lines = ",\n".join(map(_format_store_color, stores))
-        fp.write("g_storeToColor = {\n")
-        fp.write(lines)
-        fp.write("\n};\n\n")
-
+        # offers
         fp.write("g_offers = [\n")
 
         for row in offers_df.iterrows():
@@ -78,11 +50,6 @@ def write_javascript(offers_df: pd.DataFrame, stores: typing.List[str]):
 
         fp.write("]; // offers\n\n")
         fp.write("// </script>\n\n")
-
-
-def get_stores(db: price_db.Database) -> typing.List[str]:
-    stmt = "SELECT DISTINCT store FROM discount ORDER BY store"
-    return [r[0] for r in db.execute_sql(stmt)]
 
 
 def get_offers(db: price_db.Database, today=None) -> pd.DataFrame:
@@ -146,8 +113,7 @@ ORDER BY calc.store, calc."start", calc.name
 def main():
     db = price_db.Database(CURRENT_DIR / "tmp" / "prices.db")
     offers_df = get_offers(db)
-    stores = get_stores(db)
-    write_javascript(offers_df, stores)
+    write_javascript(offers_df)
 
 
 if __name__ == "__main__":
