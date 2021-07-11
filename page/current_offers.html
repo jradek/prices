@@ -89,14 +89,6 @@
         </div>
       </div>
 
-      <div class="row center">
-        <div class="col s12 input-field">
-          <a id="sortBtn" class="waves-effect waves-light btn btn-large">
-            <i class="large material-icons right">sort</i>Sort</a
-          >
-        </div>
-      </div>
-
       <table class="">
         <thead>
           <tr>
@@ -120,8 +112,9 @@
       <!-- END Page Content -->
     </div>
 
-    <!-- <?!= include("data-js"); ?> -->
+    <!-- <?!= include("current_offers_data_js"); ?> -->
     <script src="current_offers_data.js"></script>
+    <!-- <?!= include("current_offers_js"); ?> -->
     <script src="current_offers.js"></script>
 
     <script>
@@ -132,9 +125,15 @@
         elem.innerHTML = `generated at ${g_exportDate}`;
       });
 
-      document
-        .getElementById("sortBtn")
-        .addEventListener("click", sortDataCallback);
+      // install sorting callbacks
+      const sortForm = document.getElementById("predefinedSortForm");
+      const radios = sortForm.elements["sortRadioGroup"];
+      radios.forEach((it) => {
+        // console.log(it.value);
+        it.addEventListener("click", function () {
+          sortDataCallback(it.value);
+        });
+      });
     </script>
   </body>
 </html>
