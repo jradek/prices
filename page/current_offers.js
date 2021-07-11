@@ -118,11 +118,7 @@ function buildRow(row, todayString) {
   const priceDiff = price_per_serving - min_price_per_serving;
   const isDealPerServing = row[16];
   const dayName = getDayName(start);
-  let storeColors = g_storeToColor[store];
-
-  if (storeColors === undefined) {
-    storeColors = ["#eceff1", "blue-grey lighten-5", "black-text"]
-  }
+  const storeColors = g_storeToColor[store] || ["#eceff1", "blue-grey lighten-5", "black-text"];
 
   // check if entry is still valid
   // this is necessary, because export may have been a long time ago
@@ -139,15 +135,8 @@ function buildRow(row, todayString) {
     dealClasses = "yellow lighten-5";
   }
 
-  var dayStyle = "font-weight: normal";
-  if (isShort) {
-    dayStyle = "font-weight: bold";
-  }
-
-  var categoryClasses = "fas fa-question";
-  if (category in g_categories) {
-    categoryClasses = g_categories[category];
-  }
+  const dayStyle = isShort ? "font-weight: bold" : "font-weight: normal";
+  const categoryClasses = g_categories[category] || "fas fa-question";
 
   var dateAvailableIcon = "";
   if (start > todayString) {
