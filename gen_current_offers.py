@@ -103,7 +103,7 @@ SELECT
 FROM (SELECT
      d."start",
      d."end",
-     STRFTIME('%s', d.end) - STRFTIME('%s', d.start) <= 2 * 24 * 3600 AS "is_short",
+     STRFTIME('%s', d.end || ' 22:00:00') - STRFTIME('%s', d.start || ' 07:00:00') <= 2 * 24 * 3600 AS "is_short",
      d.store,
      i.name,
      i.id AS item_id,
