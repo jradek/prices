@@ -28,12 +28,12 @@ const g_sortOptionToDataColumnIds = {
   // store, start date, name, price per serving
   store: [3, 0, 4, 11],
   // start date, name, price per serving
-  date: [0, 4,  11],
+  date: [0, 4, 11],
   // name, price per serving, store
   product: [4, 11, 3],
   // category, name, price per serving
-  category: [10, 4, ]
-}
+  category: [10, 4],
+};
 
 /**
 sort array of arrays `data` by sort columns
@@ -92,10 +92,12 @@ function sortDataCallback() {
 
 function generateTable(offers) {
   var root = document.getElementById("table-body");
-  const today = isoFormat(new Date());
+  const today = isoFormatYMD(new Date());
+
   const rows = offers.map((it) => {
     return buildRow(it, today);
   });
+
   root.innerHTML = rows.join(" ");
 }
 
@@ -119,6 +121,12 @@ function buildRow(row, todayString) {
   const isDealPerServing = row[16];
   const dayName = getDayName(start);
   const storeColors = g_storeToColor[store];
+
+  // check if entry is still valid
+  // this is necessary, because export may have been a long time ago
+  if (end < todayString) {
+    return "";
+  }
 
   var dealClasses = "";
   if (isDealPercent) {
@@ -169,7 +177,7 @@ function buildRow(row, todayString) {
 // UTIL
 /////////////////////////////////////////////////////////////////////////////
 
-function isoFormat(date) {
+function isoFormatYMD(date) {
   var mm = date.getMonth() + 1; // getMonth() is zero-based
   var dd = date.getDate();
 
