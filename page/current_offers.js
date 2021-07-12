@@ -156,11 +156,11 @@ function buildRow(row, todayString) {
   <p style="${dayStyle}">${dayName} (${getDateDiffInDays(start, end) + 1})</p>
   <p style="font-size: x-small">${start}</p>
 </td>
-<td><i class="${categoryClasses}"></i></td>
-<td>${item}</td>
 <td><span class="my-store-background ${storeColors[1]} ${
     storeColors[2]
   }">${store}</span></td>
+<td><i class="${categoryClasses}"></i></td>
+<td>${item}</td>
 <td>${amount} ${unit}</td>
 <td><p>${price}&euro;<p><p style="font-size: x-small">(+${Math.abs(
     priceDiff
