@@ -1,2 +1,0 @@
-.output "prices.sql"
-.dump
