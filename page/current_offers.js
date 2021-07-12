@@ -169,7 +169,7 @@ function buildRow(row, todayString) {
   <p>${price_per_serving.toFixed(2)}&euro;/${serving_size}${unit}</p>
   <p style="font-size: x-small">(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
 </td>
-  </tr>`;
+</tr>`;
 }
 
 /////////////////////////////////////////////////////////////////////////////
