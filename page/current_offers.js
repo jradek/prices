@@ -22,19 +22,19 @@ const g_categories = {
 
 g_storeToColor = {
   // RBG, materialized name, text color
-  "aldi": ["#01579b", "light-blue darken-4", "white-text"],
-  "edeka": ["#ffff00", "yellow accent-2", "blue-text"],
+  aldi: ["#01579b", "light-blue darken-4", "white-text"],
+  edeka: ["#ffff00", "yellow accent-2", "blue-text"],
   "edeka sander": ["#ffff00", "yellow accent-2", "blue-text"],
-  "globus": ["#558b2f", "light-green darken-3", "black-text"],
-  "kaufland": ["#f44336", "red", "white-text"],
-  "lidl": ["#1976d2", "blue darken-2", "yellow-text"],
-  "netto": ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
-  "norma": ["#f57f17", "yellow darken-4", "white-text"],
-  "penny": ["#c62828", "red darken-3", "white-text"],
-  "real": ["#fffffff", "white", "indigo-text text-darken-4"],
-  "rewe": ["#b71c1c", "red darken-4", "white-text"],
-  "tegut": ["#e65100", "orange darken-4", "white-text"],
-  "thomas philipps": ["#ffffff", "white", "red-text text-darken-1"]
+  globus: ["#558b2f", "light-green darken-3", "black-text"],
+  kaufland: ["#f44336", "red", "white-text"],
+  lidl: ["#1976d2", "blue darken-2", "yellow-text"],
+  netto: ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
+  norma: ["#f57f17", "yellow darken-4", "white-text"],
+  penny: ["#c62828", "red darken-3", "white-text"],
+  real: ["#fffffff", "white", "indigo-text text-darken-4"],
+  rewe: ["#b71c1c", "red darken-4", "white-text"],
+  tegut: ["#e65100", "orange darken-4", "white-text"],
+  "thomas philipps": ["#ffffff", "white", "red-text text-darken-1"],
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -115,10 +115,16 @@ function buildRow(row, todayString) {
   const price_per_serving = row[11];
   const min_price_per_serving = row[14];
   const isDealPercent = row[15] == 1;
-  const priceDiff = price_per_serving - min_price_per_serving;
+  const priceDiffPerServing = price_per_serving - min_price_per_serving;
   const isDealPerServing = row[16];
   const dayName = getDayName(start);
-  const storeColors = g_storeToColor[store] || ["#eceff1", "blue-grey lighten-5", "black-text"];
+  const bestPrice = (min_price_per_serving * amount) / serving_size;
+  const priceDiff = price - bestPrice;
+  const storeColors = g_storeToColor[store] || [
+    "#eceff1",
+    "blue-grey lighten-5",
+    "black-text",
+  ];
 
   // check if entry is still valid
   // this is necessary, because export may have been a long time ago
@@ -156,10 +162,12 @@ function buildRow(row, todayString) {
     storeColors[2]
   }">${store}</span></td>
 <td>${amount} ${unit}</td>
-<td>${price}&euro;</td>
-<td style="font-size: x-small">
+<td><p>${price}&euro;<p><p style="font-size: x-small">(+${Math.abs(
+    priceDiff
+  ).toFixed(2)}&euro;)</p></td>
+<td>
   <p>${price_per_serving.toFixed(2)}&euro;/${serving_size}${unit}</p>
-  <p>(+${priceDiff.toFixed(2)}&euro;)</p>
+  <p style="font-size: x-small">(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
 </td>
   </tr>`;
 }
