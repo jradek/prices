@@ -2,8 +2,10 @@
 
 # dump item table to html file
 
-mkdir -p tmp/
-cat <<EOF > tmp/items.html
+output_file="tmp/item_table.html"
+
+mkdir -p "$(dirname "$output_file")"
+cat <<EOF > $output_file
 <html>
   <header>
     <style>
@@ -19,12 +21,12 @@ cat <<EOF > tmp/items.html
     <table>
 EOF
 
-sqlite3 --html tmp/prices.db "SELECT * FROM item ORDER BY name;" >> tmp/items.html
+sqlite3 --html tmp/prices.db "SELECT * FROM item ORDER BY name;" >> $output_file
 
-cat <<EOF >> tmp/items.html
+cat <<EOF >> $output_file
     </table>
   </body>
 </html>
 EOF
 
-echo "wrote 'tmp/items.html"
+echo "wrote '$output_file'"
