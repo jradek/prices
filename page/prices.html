@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top" />
+    <!--Import Google Icon Font-->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <!-- Compiled and minified CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css"
+    />
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.css"
+      rel="stylesheet"
+    />
+
+    <style>
+      /* make table rows narrow
+      td,
+      th {
+        padding: 0px 15px !important;
+      }*/
+      td > p {
+        margin-block-start: 2px;
+        margin-block-end: 2px;
+      }
+
+      .my-store-background {
+        border-radius: 4px;
+        padding: 5px 5px;
+      }
+      .my-price-background {
+        border-radius: 4px;
+        padding: 5px 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- START Page Content -->
+      <h1 class="center">Prices</h1>
+      <ul id="root" class="collapsible">
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">filter_drama</i>
+            Hackfleisch (100g)&nbsp;
+            <span class="green-text">1&euro;</span>
+            <span class="yellow-text">&nbsp;2&euro;</span>
+            <span class="red-text">&nbsp;3&euro;</span>
+            (#10)
+          </div>
+          <div class="collapsible-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Store</th>
+                  <th>Min</th>
+                  <th>Avg</th>
+                  <th>Max</th>
+                  <th>#</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <tr>
+                  <td>Aldi</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>3</td>
+                  <td>10</td>
+                </tr>
+                <tr>
+                  <td>Netto</td>
+                  <td>1.20</td>
+                  <td>1.99</td>
+                  <td>2.5</td>
+                  <td>11</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">place</i>Second
+          </div>
+          <div class="collapsible-body">
+            <span>Lorem ipsum dolor sit amet.</span>
+          </div>
+        </li>
+        <li>
+          <div class="collapsible-header">
+            <i class="material-icons">whatshot</i>Third
+          </div>
+          <div class="collapsible-body">
+            <span>Lorem ipsum dolor sit amet.</span>
+          </div>
+        </li>
+      </ul>
+      <!-- END Page Content -->
+    </div>
+
+    <!-- <?!= include("prices_data_js"); ?> -->
+    <script src="prices_data.js"></script>
+    <!-- <?!= include("shared_data_js"); ?> -->
+    <script src="shared_data.js"></script>
+    <!-- <?!= include("prices_js"); ?> -->
+    <script src="prices.js"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        generatePrices();
+
+        var elems = document.querySelectorAll(".collapsible");
+        const options = {};
+        var instances = M.Collapsible.init(elems, options);
+      });
+    </script>
+  </body>
+</html>

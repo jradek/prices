@@ -3,4 +3,5 @@ __pycache__/
 
 google_export/
 page/current_offers_data.js
+page/prices_data.js
 tmp/
