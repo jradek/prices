@@ -31,8 +31,12 @@ function processRow(data) {
 
   return `<li>
 <div class="collapsible-header">
+<div class="row">
+<div class="col s6 left-align">
   <i class="${categoryClasses}" style="${spacing}"></i>
   <b style="${spacing}">${name} (${serving_size} ${unit})</b>
+</div>
+<div class="col s6 right-align">
   <span class="my-price-background green" style="${spacing}">${min_price.toFixed(
     2
   )}&euro;</span>
@@ -43,6 +47,8 @@ function processRow(data) {
     2
   )}&euro;</span>
   <span style="${spacing}">#${num_measures}</span>
+</div>
+</div>
 </div>
 <div class="collapsible-body">
 ${per_store_html}
