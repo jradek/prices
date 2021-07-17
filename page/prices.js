@@ -27,22 +27,26 @@ function processRow(data) {
   const per_store = data[9];
   const per_store_html = formatStores(per_store);
 
-  const spacing = "padding: 0px 2px;";
+  const style = "width: 80px; float: left";
 
   return `<li>
-<div class="collapsible-header">
-  <i class="${categoryClasses}" style="${spacing}"></i>
-  <b style="${spacing}">${name} (${serving_size} ${unit})</b>
-  <span class="my-price-background green" style="${spacing}">${min_price.toFixed(
+<div class="collapsible-header" style="display: flex; justify-content: space-between">
+<div>
+  <i class="${categoryClasses}"></i>
+  <span style="font-weight: bold">${name} (${serving_size} ${unit})</span>
+</div>
+<div>
+  <span class="my-price-background green lighten-2 center" style="${style}">${min_price.toFixed(
     2
   )}&euro;</span>
-  <span class="my-price-background yellow darken-3" style="${spacing}">${avg_price.toFixed(
+  <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price.toFixed(
     2
   )}&euro;</span>
-  <span class="my-price-background red" style="${spacing}">${max_price.toFixed(
+  <span class="my-price-background red lighten-2 center" style="${style}">${max_price.toFixed(
     2
   )}&euro;</span>
-  <span style="${spacing}">#${num_measures}</span>
+  <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
+</div>
 </div>
 <div class="collapsible-body">
 ${per_store_html}
