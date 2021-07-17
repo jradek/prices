@@ -25,7 +25,7 @@ g_storeToColor = {
   aldi: ["#01579b", "light-blue darken-4", "white-text"],
   edeka: ["#ffff00", "yellow accent-2", "blue-text"],
   "edeka sander": ["#ffff00", "yellow accent-2", "blue-text"],
-  globus: ["#00c853", "green accent-4", "orange-text text-darken-5"],
+  globus: ["#a5d6a7", "green lighten-3", "black-text"],
   kaufland: ["#f44336", "red", "white-text"],
   lidl: ["#1976d2", "blue darken-2", "yellow-text"],
   netto: ["#ff3d00", "deep-orange accent-3", "yellow-text text-lighten-2"],
