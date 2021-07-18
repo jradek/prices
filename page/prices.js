@@ -27,26 +27,26 @@ function processRow(data) {
   const per_store = data[9];
   const per_store_html = formatStores(per_store);
 
-  const spacing = "padding: 0px 2px;";
+  const style = "width: 80px; float: left";
 
   return `<li>
-<div class="collapsible-header">
-<div class="row">
-<div class="col s6 left-align">
-  <i class="${categoryClasses}" style="${spacing}"></i>
-  <b style="${spacing}">${name} (${serving_size} ${unit})</b>
+<div class="collapsible-header" style="display: flex; justify-content: space-between">
+<div>
+  <i class="${categoryClasses}"></i>
+  <span style="font-weight: bold">${name} (${serving_size} ${unit})</span>
 </div>
-<div class="col s6 right-align">
-  <span class="my-price-background green" style="${spacing}">${min_price.toFixed(
+<div>
+  <span class="my-price-background green lighten-2 center" style="${style}">${min_price.toFixed(
     2
   )}&euro;</span>
-  <span class="my-price-background yellow darken-3" style="${spacing}">${avg_price.toFixed(
+  <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price.toFixed(
     2
   )}&euro;</span>
-  <span class="my-price-background red" style="${spacing}">${max_price.toFixed(
+  <span class="my-price-background red lighten-2 center" style="${style}">${max_price.toFixed(
     2
   )}&euro;</span>
-  <span style="${spacing}">#${num_measures}</span>
+  <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
+</div>
 </div>
 </div>
 </div>
@@ -57,7 +57,15 @@ ${per_store_html}
 }
 
 function formatStores(data) {
-  const rows = data.map((it) => formatStoreRow(it));
+  const pricesPerServing = data
+    .map((it) => {
+      return it[1];
+    })
+    .sort();
+
+  const minPrice = pricesPerServing[0];
+  const maxPrice = pricesPerServing.pop();
+  const rows = data.map((it) => formatStoreRow(it, minPrice, maxPrice));
 
   return `
 <table>
@@ -65,7 +73,7 @@ function formatStores(data) {
     <tr>
       <th>Store</th>
       <th>Min</th>
-      <th>Avg</th>
+      <th>Average</th>
       <th>Max</th>
       <th>#</th>
     </tr>
@@ -76,7 +84,7 @@ function formatStores(data) {
 </table>`;
 }
 
-function formatStoreRow(row) {
+function formatStoreRow(row, overallMinPrice, overallMaxPrice) {
   // console.log(row);
   const store = row[0];
   const min_price = row[1];
@@ -90,8 +98,16 @@ function formatStoreRow(row) {
     "black-text",
   ];
 
+  // mark best/worst min price per serving
+  let rowStyle = "";
+  if (min_price < overallMinPrice + 0.01) {
+    rowStyle = "green lighten-5";
+  } else if (min_price > overallMaxPrice - 0.01) {
+    rowStyle = "red lighten-5";
+  }
+
   return `
-<tr>
+<tr class="${rowStyle}">
   <td><span class="my-store-background ${storeColors[1]} ${
     storeColors[2]
   }">${store}</span></td>
