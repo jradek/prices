@@ -56,12 +56,15 @@ ${per_store_html}
   </li>`;
 }
 
+// https://raddevon.com/articles/sort-array-numbers-javascript/
+const numberSorter = (a, b) => a - b;
+
 function formatStores(data) {
   const pricesPerServing = data
     .map((it) => {
       return it[1];
     })
-    .sort();
+    .sort(numberSorter);
 
   const minPrice = pricesPerServing[0];
   const maxPrice = pricesPerServing.pop();
