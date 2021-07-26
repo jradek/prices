@@ -41,9 +41,24 @@
     </style>
   </head>
   <body>
+    <div class="navbar-fixed">
+      <nav>
+        <div class="nav-wrapper center green">
+          <a href="#" class="brand-logo">Current Offers</a>
+          <ul id="nav-mobile" class="right">
+            <li>
+              <a href="#"><i class="fa fa-chevron-up"></i></a>
+            </li>
+            <li>
+              <a href="#bottom"><i class="fa fa-chevron-down"></i></a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
     <div class="container">
       <!-- START Page Content -->
-      <h1 class="center">Current Offers</h1>
+
       <p class="center" style="font-size: small" id="exportDate"></p>
 
       <div class="row center">
@@ -109,6 +124,8 @@
 
       <ul id="root"></ul>
       <!-- END Page Content -->
+
+      <a name="bottom"></a>
     </div>
 
     <!-- <?!= include("current_offers_data_js"); ?> -->
