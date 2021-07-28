@@ -2385,6 +2385,12 @@ INSERT INTO discount VALUES(2371,'2021-08-02','2021-08-07','aldi',60,780,399);
 INSERT INTO discount VALUES(2372,'2021-08-02','2021-08-04','kaufland',5,700,999);
 INSERT INTO discount VALUES(2373,'2021-08-06','2021-08-07','aldi',74,2000,111);
 INSERT INTO discount VALUES(2374,'2021-07-26','2021-07-31','penny',30,500,39);
+INSERT INTO discount VALUES(2375,'2021-08-02','2021-08-07','lidl',47,750,269);
+INSERT INTO discount VALUES(2376,'2021-08-02','2021-08-07','lidl',77,700,849);
+INSERT INTO discount VALUES(2377,'2021-08-02','2021-08-07','lidl',99,250,99);
+INSERT INTO discount VALUES(2378,'2021-08-02','2021-08-07','lidl',88,900,359);
+INSERT INTO discount VALUES(2379,'2021-08-02','2021-08-07','lidl',25,1000,666);
+INSERT INTO discount VALUES(2380,'2021-08-06','2021-08-07','lidl',12,10,129);
 CREATE TABLE item (
 	id INTEGER NOT NULL, 
 	name TEXT, 
@@ -2492,6 +2498,7 @@ INSERT INTO item VALUES(95,'Chinakohl',100,'g','vegetable');
 INSERT INTO item VALUES(96,'Bio Eier',1,'Stueck','egg');
 INSERT INTO item VALUES(97,'Kopfsalat',1,'Stueck','vegetable');
 INSERT INTO item VALUES(98,'Zucchini',100,'g','vegetable');
+INSERT INTO item VALUES(99,'Feta',100,'g','vegetable');
 CREATE TABLE regular (
 	id INTEGER NOT NULL,
 	date TEXT,
