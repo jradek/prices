@@ -2491,4 +2491,21 @@ INSERT INTO item VALUES(95,'Chinakohl',100,'g','vegetable');
 INSERT INTO item VALUES(96,'Bio Eier',1,'Stueck','egg');
 INSERT INTO item VALUES(97,'Kopfsalat',1,'Stueck','vegetable');
 INSERT INTO item VALUES(98,'Zucchini',100,'g','vegetable');
+CREATE TABLE regular (
+	id INTEGER NOT NULL,
+	date TEXT,
+	store TEXT,
+	item_id INTEGER,
+	amount INTEGER,
+	price_cent INTEGER,
+	PRIMARY KEY (id)
+);
+INSERT INTO regular VALUES(1,'2021-01-01','kaufland',12,10,129);
+INSERT INTO regular VALUES(2,'2021-01-01','aldi',12,10,129);
+INSERT INTO regular VALUES(3,'2021-01-01','lidl',12,10,129);
+INSERT INTO regular VALUES(4,'2021-01-01','netto',12,10,129);
+INSERT INTO regular VALUES(5,'2021-07-18','kaufland',12,10,159);
+INSERT INTO regular VALUES(6,'2021-07-18','aldi',12,10,159);
+INSERT INTO regular VALUES(7,'2021-07-18','lidl',12,10,159);
+INSERT INTO regular VALUES(8,'2021-07-18','netto',12,10,159);
 COMMIT;
