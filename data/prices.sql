@@ -1,13 +1,13 @@
 PRAGMA foreign_keys=OFF;
 BEGIN TRANSACTION;
 CREATE TABLE discount (
-	id INTEGER NOT NULL, 
-	start TEXT, 
-	"end" TEXT, 
-	store TEXT, 
-	item_id INTEGER, 
-	amount INTEGER, 
-	price_cent INTEGER, 
+	id INTEGER NOT NULL,
+	start TEXT,
+	"end" TEXT,
+	store TEXT,
+	item_id INTEGER,
+	amount INTEGER,
+	price_cent INTEGER,
 	PRIMARY KEY (id)
 );
 INSERT INTO discount VALUES(0,'2020-04-09','2020-04-15','kaufland',24,500,199);
@@ -2392,11 +2392,11 @@ INSERT INTO discount VALUES(2378,'2021-08-02','2021-08-07','lidl',88,900,359);
 INSERT INTO discount VALUES(2379,'2021-08-02','2021-08-07','lidl',25,1000,666);
 INSERT INTO discount VALUES(2380,'2021-08-06','2021-08-07','lidl',12,10,129);
 CREATE TABLE item (
-	id INTEGER NOT NULL, 
-	name TEXT, 
-	serving_size INTEGER, 
-	unit TEXT, 
-	category TEXT, 
+	id INTEGER NOT NULL,
+	name TEXT,
+	serving_size INTEGER,
+	unit TEXT,
+	category TEXT,
 	PRIMARY KEY (id)
 );
 INSERT INTO item VALUES(0,'Almigurth',100,'g','dairy');
@@ -2516,4 +2516,6 @@ INSERT INTO regular VALUES(4,'2021-07-18','kaufland',12,10,159);
 INSERT INTO regular VALUES(5,'2021-07-18','aldi',12,10,159);
 INSERT INTO regular VALUES(6,'2021-07-18','lidl',12,10,159);
 INSERT INTO regular VALUES(7,'2021-07-18','netto',12,10,159);
+INSERT INTO regular VALUES(8,'2021-07-26','lidl',60,195,119);
+INSERT INTO regular VALUES(9,'2021-07-26','netto',60,195,119);
 COMMIT;
