@@ -81,7 +81,7 @@ function buildRow(row, todayString) {
   const priceDiffPerServing = price_per_serving - min_price_per_serving;
   const isDealPerServing = row[16];
   const isDealStore = row[17];
-  const storeRegularPricePerServing = row[18];
+  const store_regular_price_per_serving = row[18];
   const dayName = getDayName(start);
   const bestPrice = (min_price_per_serving * amount) / serving_size;
   const priceDiff = price - bestPrice;
@@ -102,32 +102,43 @@ function buildRow(row, todayString) {
 
   if (isDealPerServing) {
     dealClasses = "green lighten-5";
-    dealIcons += "<p style=\"font-size: x-small\"><i class=\"fas fa-puzzle-piece\"></i></p>";
+    dealIcons +=
+      '<p style="font-size: x-small"><i class="fas fa-puzzle-piece"></i></p>';
   }
 
   if (isDealPercent) {
     dealClasses = "green lighten-5";
-    dealIcons += "<p style=\"font-size: x-small\">5&#37;<p>"
+    dealIcons += '<p style="font-size: x-small">5&#37;<p>';
   }
 
   if (isDealStore) {
     dealClasses = "green lighten-5";
-    dealIcons += "<p style=\"font-size: x-small\"><i class=\"fas fa-store\"></i></p>";
+    dealIcons +=
+      '<p style="font-size: x-small"><i class="fas fa-store"></i></p>';
   }
 
   if (isDealStore && !isDealPercent && !isDealPerServing) {
     dealClasses = "yellow lighten-5";
   }
 
-  // var storeRegularPerServingStr = "";
-  // var storeRegularPriceStr = "";
+  // per store handling
+  var store_diff_serving_str = "";
+  var store_diff_total_str = "";
 
-  // if (storeRegularPricePerServing) {
-  //   const foo = storeRegularPricePerServing - min_price_per_serving;
-  //   storeRegularPerServingStr = `<p style="font-size: x-small">(+${foo.toFixed(2)}&euro;)</p>`
-  //   const bar = (storeRegularPricePerServing * amount / serving_size) - (min_price_per_serving * amount / serving_size);
-  //   storeRegularPriceStr = `<p style="font-size: x-small">(+${bar.toFixed(2)}&euro;)</p>`;
-  // }
+  if (store_regular_price_per_serving) {
+    const serv = price_per_serving - store_regular_price_per_serving;
+    let sign = serv >= 0 ? "+" : "";
+    store_diff_serving_str = `<p style="font-size: x-small">(${sign}${serv.toFixed(
+      2
+    )}&euro;)</p>`;
+    const p =
+      (price_per_serving * amount) / serving_size -
+      (store_regular_price_per_serving * amount) / serving_size;
+    sign = p >= 0 ? "+" : "";
+    store_diff_total_str = `<p style="font-size: x-small">(${sign}${p.toFixed(
+      2
+    )}&euro;)</p>`;
+  }
 
   const dayStyle = isShort ? "font-weight: bold" : "font-weight: normal";
   const categoryClasses = g_categories[category] || "fas fa-question";
@@ -154,10 +165,12 @@ function buildRow(row, todayString) {
 <td><p>${price}&euro;<p><p style="font-size: x-small">(+${Math.abs(
     priceDiff
   ).toFixed(2)}&euro;)</p>
+  ${store_diff_total_str}
 </td>
 <td>
   <p>${price_per_serving.toFixed(2)}&euro;/${serving_size}${unit}</p>
   <p style="font-size: x-small">(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
+  ${store_diff_serving_str}
 </td>
 </tr>`;
 }
