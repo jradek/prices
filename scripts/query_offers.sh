@@ -15,6 +15,7 @@ SELECT
     d.start, 
     d.end, 
     d.store, 
+    printf('%3d', i.id),
     i.name, 
     d.amount, 
     i.unit, 
