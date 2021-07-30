@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import datetime
+import math
 
 from pathlib import Path
 import pandas as pd
@@ -44,6 +45,8 @@ def write_javascript(offers_df: pd.DataFrame):
             for val in series:
                 if isinstance(val, str):
                     items.append(f'"{val}"')
+                elif math.isnan(float(val)):
+                    items.append("null")
                 else:
                     items.append(str(val))
             fp.write(f'\t[{", ".join(items)}],\n')
@@ -66,6 +69,9 @@ SELECT
      calc.price_per_serving < min_price.min_price_per_serving * 1.05 AS "is_deal_percent",
      -- deal, when price per serving is less then 5 cent more than min serving
      calc.price_per_serving < min_price.min_price_per_serving + 0.06 AS "is_deal_cent",
+	 -- deal, when lower than regular price for store
+	 calc.price_per_serving <  regular.per_serving + 0.01 AS "is_deal_store",
+	 regular.per_serving as "regular_per_serving",
      measures.num_measures
 FROM (SELECT
      d."start",
@@ -100,6 +106,20 @@ JOIN (SELECT
      JOIN item i on i.id = d.item_id
      GROUP BY i.id
 ) AS measures
+LEFT JOIN (
+	SELECT
+		i.id as "item_id",
+		i.name,
+		r.store,
+		round(r.price_cent * i.serving_size * 1.0 / r.amount / 100.0, 2) AS "per_serving"
+	FROM item i
+	JOIN (
+		SELECT item_id, store, price_cent, amount
+		FROM regular
+		GROUP BY item_id, store
+		HAVING `date` <= "{date}"
+	) AS r ON i.id = r.item_id
+) AS regular ON (regular.item_id = calc.item_id) AND (regular.store = calc.store)
 WHERE "{date}" <= calc."end"
   AND min_price.id = calc.item_id
   AND measures.id = calc.item_id
