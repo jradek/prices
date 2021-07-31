@@ -80,8 +80,7 @@ function buildRow(row, todayString) {
   const isDealPercent = row[15] == 1;
   const priceDiffPerServing = price_per_serving - min_price_per_serving;
   const isDealPerServing = row[16];
-  const isDealStore = row[17];
-  const store_regular_price_per_serving = row[18];
+  const store_regular_price_per_serving = row[17];
   const dayName = getDayName(start);
   const bestPrice = (min_price_per_serving * amount) / serving_size;
   const priceDiff = price - bestPrice;
@@ -111,31 +110,27 @@ function buildRow(row, todayString) {
     dealIcons += '<p style="font-size: x-small">5&#37;<p>';
   }
 
-  if (isDealStore) {
-    dealClasses = "green lighten-5";
-    dealIcons +=
-      '<p style="font-size: x-small"><i class="fas fa-store"></i></p>';
-  }
-
-  if (isDealStore && !isDealPercent && !isDealPerServing) {
-    dealClasses = "yellow lighten-5";
-  }
 
   // per store handling
   var store_diff_serving_str = "";
   var store_diff_total_str = "";
 
   if (store_regular_price_per_serving) {
+
+    if (!isDealPercent && !isDealPerServing) {
+      dealClasses = "yellow lighten-5";
+    }
+
     const serv = price_per_serving - store_regular_price_per_serving;
     let sign = serv >= 0 ? "+" : "";
-    store_diff_serving_str = `<p style="font-size: x-small">(${sign}${serv.toFixed(
+    store_diff_serving_str = `<p style="font-size: x-small"><i class="fas fa-store-alt"></i>&nbsp;(${sign}${serv.toFixed(
       2
     )}&euro;)</p>`;
     const p =
       (price_per_serving * amount) / serving_size -
       (store_regular_price_per_serving * amount) / serving_size;
     sign = p >= 0 ? "+" : "";
-    store_diff_total_str = `<p style="font-size: x-small">(${sign}${p.toFixed(
+    store_diff_total_str = `<p style="font-size: x-small"><i class="fas fa-store-alt"></i>&nbsp;(${sign}${p.toFixed(
       2
     )}&euro;)</p>`;
   }
@@ -162,14 +157,16 @@ function buildRow(row, todayString) {
 <td>${item}</td>
 <td>${amount} ${unit}</td>
 <td>${dealIcons}</td>
-<td><p>${price}&euro;<p><p style="font-size: x-small">(+${Math.abs(
+<td><p>${price}&euro;<p><p style="font-size: x-small">
+  <i class="fa fa-cart-arrow-down"></i>&nbsp;(+${Math.abs(
     priceDiff
   ).toFixed(2)}&euro;)</p>
   ${store_diff_total_str}
 </td>
 <td>
   <p>${price_per_serving.toFixed(2)}&euro;/${serving_size}${unit}</p>
-  <p style="font-size: x-small">(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
+  <p style="font-size: x-small">
+  <i class="fa fa-cart-arrow-down"></i>&nbsp;(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
   ${store_diff_serving_str}
 </td>
 </tr>`;

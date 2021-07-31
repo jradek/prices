@@ -69,9 +69,7 @@ SELECT
      calc.price_per_serving < min_price.min_price_per_serving * 1.05 AS "is_deal_percent",
      -- deal, when price per serving is less then 5 cent more than min serving
      calc.price_per_serving < min_price.min_price_per_serving + 0.06 AS "is_deal_cent",
-	 -- deal, when lower than regular price for store
-	 calc.price_per_serving <  regular.per_serving + 0.01 AS "is_deal_store",
-	 regular.per_serving as "regular_per_serving",
+	 regular.per_serving as "store_regular_per_serving",
      measures.num_measures
 FROM (SELECT
      d."start",
