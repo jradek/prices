@@ -110,29 +110,27 @@ function buildRow(row, todayString) {
     dealIcons += '<p style="font-size: x-small">5&#37;<p>';
   }
 
-
   // per store handling
   var store_diff_serving_str = "";
   var store_diff_total_str = "";
 
   if (store_regular_price_per_serving) {
-
     if (!isDealPercent && !isDealPerServing) {
       dealClasses = "yellow lighten-5";
     }
 
     const serv = price_per_serving - store_regular_price_per_serving;
     let sign = serv >= 0 ? "+" : "";
-    store_diff_serving_str = `<p style="font-size: x-small"><i class="fas fa-store-alt"></i>&nbsp;(${sign}${serv.toFixed(
+    store_diff_serving_str = `<p style="font-size: x-small">${sign}${serv.toFixed(
       2
-    )}&euro;)</p>`;
+    )}&euro;&nbsp;<i class="fas fa-store-alt"></i></p>`;
     const p =
       (price_per_serving * amount) / serving_size -
       (store_regular_price_per_serving * amount) / serving_size;
     sign = p >= 0 ? "+" : "";
-    store_diff_total_str = `<p style="font-size: x-small"><i class="fas fa-store-alt"></i>&nbsp;(${sign}${p.toFixed(
+    store_diff_total_str = `<p style="font-size: x-small">${sign}${p.toFixed(
       2
-    )}&euro;)</p>`;
+    )}&euro;&nbsp;<i class="fas fa-store-alt"></i></p>`;
   }
 
   const dayStyle = isShort ? "font-weight: bold" : "font-weight: normal";
@@ -158,15 +156,16 @@ function buildRow(row, todayString) {
 <td>${amount} ${unit}</td>
 <td>${dealIcons}</td>
 <td><p>${price}&euro;<p><p style="font-size: x-small">
-  <i class="fa fa-cart-arrow-down"></i>&nbsp;(+${Math.abs(
-    priceDiff
-  ).toFixed(2)}&euro;)</p>
+  +${Math.abs(priceDiff).toFixed(
+    2
+  )}&euro;&nbsp;<i class="fa fa-cart-arrow-down"></i></p>
   ${store_diff_total_str}
 </td>
 <td>
   <p>${price_per_serving.toFixed(2)}&euro;/${serving_size}${unit}</p>
-  <p style="font-size: x-small">
-  <i class="fa fa-cart-arrow-down"></i>&nbsp;(+${priceDiffPerServing.toFixed(2)}&euro;)</p>
+  <p style="font-size: x-small">+${priceDiffPerServing.toFixed(
+    2
+  )}&euro;&nbsp;<i class="fa fa-cart-arrow-down"></i></p>
   ${store_diff_serving_str}
 </td>
 </tr>`;
