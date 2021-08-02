@@ -220,8 +220,7 @@ def i_alpha_items(start: Optional[str] = None):
 def i_show_discounts():
     global DISCOUNTS
     for idx, d in enumerate(DISCOUNTS):
-        print(f"= {idx:02d}")
-        CONSOLE.print(i_format_discount(d))
+        CONSOLE.print(f"{idx:02d}: {i_format_discount(d)}")
 
 
 def i_delete_discount(idx: int):
