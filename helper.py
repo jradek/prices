@@ -4,6 +4,8 @@ import datetime
 import itertools
 import sqlite3
 
+import rich.console
+
 from dataclasses import dataclass
 from fuzzywuzzy import fuzz
 from typing import List, Mapping, Optional, Set, Tuple
@@ -18,6 +20,16 @@ class Item:
 
     def __str__(self):
         return f"({self.item_id}) {self.name} {self.serving_size}{self.unit}"
+
+
+@dataclass
+class Discount:
+    start: str
+    end: str
+    store: str
+    item_id: int
+    amount: int
+    price_cent: int
 
 
 def get_items() -> Mapping[int, Item]:
@@ -114,26 +126,6 @@ def parse_date(s: str):
 # =====================================================================
 
 
-@dataclass
-class Discount:
-    start: str
-    end: str
-    store: str
-    item_id: int
-    amount: int
-    price_cent: int
-
-    def format(self) -> str:
-        global ITEMS, STORES
-        store_opt = ""
-        if self.store not in STORES:
-            store_opt = "!"
-        item = ITEMS[self.item_id]
-        price_euro = self.price_cent * 1.0 / 100.0
-        s = f"""{format_date(self.start)} - {format_date(self.end)}: {self.store}{store_opt}, {item.name}, {self.amount}{item.unit}, {price_euro}€"""
-        return s
-
-
 ITEMS = {}
 STORES = set()
 LAST_BEST_MATCH_ITEM_ID = -1
@@ -141,6 +133,20 @@ LAST_STORE = None
 MONDAY = ""
 SATURDAY = ""
 DISCOUNTS: List[Discount] = []
+CONSOLE = rich.console.Console()
+
+
+def i_format_discount(d: Discount, con=CONSOLE) -> str:
+    global ITEMS, STORES
+    store_opt_start = ""
+    store_opt_end = ""
+    if d.store not in STORES:
+        store_opt_start = "[bold red]"
+        store_opt_end = "[/bold red]"
+    item = ITEMS[d.item_id]
+    price_euro = d.price_cent * 1.0 / 100.0
+    s = f"""{format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
+    return s
 
 
 def i_setup():
@@ -157,7 +163,7 @@ def i_fz_search(name: str, **kwargs):
     for idx, item in enumerate(results):
         if idx == 0:
             LAST_BEST_MATCH_ITEM_ID = item.item_id
-        print(item)
+        CONSOLE.print(item)
 
 
 def i_discount(
@@ -168,7 +174,7 @@ def i_discount(
     start: Optional[str] = None,
     end: Optional[str] = None,
 ):
-    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS
+    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE
 
     start_date = parse_date(MONDAY)
     end_date = parse_date(SATURDAY)
@@ -189,20 +195,17 @@ def i_discount(
     if store is None and LAST_STORE is not None:
         store = LAST_STORE
 
-    if store not in STORES:
-        print(f"\nWARNING: unknown store '{store}'\n")
-
     LAST_STORE = store
 
     discount = Discount(start_date, end_date, store, item.item_id, amount, price_cent)
-    print(discount.format())
+    CONSOLE.print(i_format_discount(discount))
 
     res = input("Is this correct [yN]? ")
     if res.lower() == "y":
-        print("... discount added")
+        CONSOLE.print("... discount added", style="green")
         DISCOUNTS.append(discount)
     else:
-        print("... discount rejected")
+        CONSOLE.print("... discount rejected", style="red")
 
 
 def i_alpha_items(start: Optional[str] = None):
@@ -210,14 +213,14 @@ def i_alpha_items(start: Optional[str] = None):
     for idx, item in enumerate(alpha_items(ITEMS, start)):
         if (idx > 0) and (idx % 10 == 0):
             input("Continue ...")
-        print(f"{idx:03d}. {item}")
+        CONSOLE.print(f"{idx:03d}. {item}")
 
 
 def i_show_discounts():
     global DISCOUNTS
     for idx, d in enumerate(DISCOUNTS):
         print(f"= {idx:02d}")
-        print(d.format())
+        CONSOLE.print(i_format_discount(d))
 
 
 def i_dump_sql() -> str:
