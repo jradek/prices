@@ -134,7 +134,7 @@ LAST_STORE = None
 MONDAY = ""
 SATURDAY = ""
 DISCOUNTS: List[Discount] = []
-CONSOLE = rich.console.Console()
+CONSOLE = None
 
 
 def i_format_discount(d: Discount, con=CONSOLE) -> str:
@@ -146,20 +146,22 @@ def i_format_discount(d: Discount, con=CONSOLE) -> str:
         store_opt_end = "[/bold red]"
     item = ITEMS[d.item_id]
     price_euro = d.price_cent * 1.0 / 100.0
+    date_start_style = ""
+    date_end_syle = ""
     s = f"""{format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
     return s
 
 
 def i_setup():
-    global ITEMS, STORES, MONDAY, SATURDAY
+    global ITEMS, STORES, MONDAY, SATURDAY, CONSOLE
     ITEMS = get_items()
     STORES = get_stores()
     MONDAY, SATURDAY = get_monday_saturday()
+    CONSOLE = rich.console.Console()
 
 
 def i_fz_search(name: str, **kwargs):
-    global ITEMS
-    global LAST_BEST_MATCH_ITEM_ID
+    global ITEMS, LAST_BEST_MATCH_ITEM_ID
     results = fz_search(ITEMS, name, **kwargs)
     for idx, item in enumerate(results):
         if idx == 0:
@@ -185,6 +187,10 @@ def i_discount(
     if end is not None:
         end_date = parse_date(end)
 
+    if start_date > end_date:
+        CONSOLE.print(f"Invalid date range {start_date} - {end_date}", style="red")
+        return
+
     item = None
     if item_id is not None:
         item = ITEMS[item_id]
@@ -192,6 +198,7 @@ def i_discount(
         item = ITEMS[LAST_BEST_MATCH_ITEM_ID]
     else:
         raise ValueError("No itemid given")
+
 
     if store is None and LAST_STORE is not None:
         store = LAST_STORE
@@ -218,13 +225,13 @@ def i_alpha_items(start: Optional[str] = None):
 
 
 def i_show_discounts():
-    global DISCOUNTS
+    global CONSOLE, DISCOUNTS
     for idx, d in enumerate(DISCOUNTS):
         CONSOLE.print(f"{idx:02d}: {i_format_discount(d)}")
 
 
 def i_delete_discount(idx: int):
-    global DISCOUNTS, CONSOLE
+    global CONSOLE, DISCOUNTS
     try:
         DISCOUNTS.pop(idx)
     except Exception as e:
@@ -232,10 +239,10 @@ def i_delete_discount(idx: int):
 
 
 def i_dump_sql() -> str:
+    global DISCOUNTS, CONSOLE
     last_id = get_last_discount_id()
 
     lines = []
-    global DISCOUNTS, CONSOLE
     for idx, entry in enumerate(DISCOUNTS):
         line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{entry.start}','{entry.end}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
         lines.append(line)
