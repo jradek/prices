@@ -3,6 +3,7 @@
 import datetime
 import itertools
 import sqlite3
+from rich import style
 
 import rich.console
 
@@ -223,19 +224,29 @@ def i_show_discounts():
         CONSOLE.print(i_format_discount(d))
 
 
+def i_delete_discount(idx: int):
+    global DISCOUNTS, CONSOLE
+    try:
+        DISCOUNTS.pop(idx)
+    except Exception as e:
+        CONSOLE.print(f"Failed to remove index {idx}", style="red")
+
+
 def i_dump_sql() -> str:
     last_id = get_last_discount_id()
 
     lines = []
-    global DISCOUNTS
+    global DISCOUNTS, CONSOLE
     for idx, entry in enumerate(DISCOUNTS):
         line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{entry.start}','{entry.end}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
         lines.append(line)
 
     lines = "\n".join(lines)
 
-    with open("new_discounts.sql", "a") as fp:
+    fn = "new_discounts.sql"
+    with open(fn, "a") as fp:
         fp.write(lines)
+        CONSOLE.print(f"Wrote {fn}", style="green")
 
 
 def main():
