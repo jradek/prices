@@ -1,2 +1,4 @@
+fuzzywuzzy
+python-Levenshtein
 pandas
 sqlalchemy
