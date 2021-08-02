@@ -118,6 +118,8 @@ function buildRow(row, todayString) {
     if (!isDealPercent && !isDealPerServing) {
       dealClasses = "yellow lighten-5";
     }
+    dealIcons +=
+      '<p style="font-size: x-small"><i class="fas fa-store-alt"></i></p>';
 
     const serv = price_per_serving - store_regular_price_per_serving;
     let sign = serv >= 0 ? "+" : "";
