@@ -29,31 +29,30 @@ function processRow(data) {
 
   const style = "width: 80px; float: left";
 
-  return `<li>
-<div class="collapsible-header" style="display: flex; justify-content: space-between">
-<div>
-  <i class="${categoryClasses}"></i>
-  <span style="font-weight: bold">${name} (${serving_size} ${unit})</span>
-</div>
-<div>
-  <span class="my-price-background green lighten-2 center" style="${style}">${min_price.toFixed(
-    2
-  )}&euro;</span>
-  <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price.toFixed(
-    2
-  )}&euro;</span>
-  <span class="my-price-background red lighten-2 center" style="${style}">${max_price.toFixed(
-    2
-  )}&euro;</span>
-  <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
-</div>
-</div>
-</div>
-</div>
-<div class="collapsible-body">
-${per_store_html}
-</div>
-  </li>`;
+  return `
+<li>
+  <div class="collapsible-header" style="display: flex; justify-content: space-between">
+    <div>
+      <i class="${categoryClasses}"></i>
+      <span style="font-weight: bold">${name} (${serving_size} ${unit})</span>
+    </div>
+    <div>
+      <span class="my-price-background green lighten-2 center" style="${style}">${min_price.toFixed(
+        2
+      )}&euro;</span>
+      <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price.toFixed(
+        2
+      )}&euro;</span>
+      <span class="my-price-background red lighten-2 center" style="${style}">${max_price.toFixed(
+        2
+      )}&euro;</span>
+      <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
+    </div>
+  </div>
+  <div class="collapsible-body">
+    ${per_store_html}
+  </div>
+</li>`;
 }
 
 // https://raddevon.com/articles/sort-array-numbers-javascript/
@@ -81,8 +80,8 @@ function formatStores(data) {
       <th>#</th>
     </tr>
   </thead>
-    ${rows.join(" ")}
   <tbody>
+    ${rows.join(" ")}
   </tbody>
 </table>`;
 }
