@@ -1,11 +1,10 @@
 #! /usr/bin/env python3
 
 import logging
+import sqlite3
 import pandas as pd
 
 from pathlib import Path
-
-from price_db import Database
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
@@ -17,7 +16,7 @@ CURRENT_DIR = Path(__file__).absolute().parent
 LOGGER = logging.getLogger("gen_prices")
 
 
-def get_min_prices(db: Database) -> pd.DataFrame:
+def get_min_prices(con: sqlite3.Connection) -> pd.DataFrame:
     stmt = """
 	SELECT
 		per_store.id,
@@ -75,7 +74,6 @@ def get_min_prices(db: Database) -> pd.DataFrame:
 	) AS overall
 	ORDER BY name, id, store
 """
-    con = db.get_connection()
     df = pd.read_sql(stmt, con)
     return df
 
@@ -120,9 +118,9 @@ def write_javascript(prices_df: pd.DataFrame):
 
 
 def main():
-    db = Database(CURRENT_DIR / "tmp" / "prices.db")
-    df = get_min_prices(db)
-    write_javascript(df)
+    with sqlite3.connect(CURRENT_DIR / "tmp" / "prices.db") as con:
+        df = get_min_prices(con)
+        write_javascript(df)
 
 
 if __name__ == "__main__":
