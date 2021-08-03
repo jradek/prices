@@ -2,12 +2,11 @@
 
 import datetime
 import math
+import sqlite3
 
 from pathlib import Path
 import pandas as pd
-import typing
 
-import price_db
 
 pd.set_option("display.max_rows", None)
 pd.set_option("display.max_columns", None)
@@ -55,7 +54,7 @@ def write_javascript(offers_df: pd.DataFrame):
         fp.write("// </script>\n\n")
 
 
-def get_offers(db: price_db.Database, today=None) -> pd.DataFrame:
+def get_offers(con: sqlite3.Connection, today=None) -> pd.DataFrame:
     today = datetime.date.today() if today == None else today
     date = today.strftime("%Y-%m-%d")
 
@@ -124,14 +123,14 @@ WHERE "{date}" <= calc."end"
 ORDER BY calc.store, calc."start", calc.name
     """
 
-    df = pd.read_sql(stmt, db.get_connection())
+    df = pd.read_sql(stmt, con)
     return df
 
 
 def main():
-    db = price_db.Database(CURRENT_DIR / "tmp" / "prices.db")
-    offers_df = get_offers(db)
-    write_javascript(offers_df)
+    with sqlite3.connect(CURRENT_DIR / "tmp" / "prices.db") as con:
+        offers_df = get_offers(con)
+        write_javascript(offers_df)
 
 
 if __name__ == "__main__":
