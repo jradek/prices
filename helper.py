@@ -3,7 +3,6 @@
 import datetime
 import itertools
 import sqlite3
-from rich import style
 
 import rich.console
 
@@ -146,8 +145,6 @@ def i_format_discount(d: Discount, con=CONSOLE) -> str:
         store_opt_end = "[/bold red]"
     item = ITEMS[d.item_id]
     price_euro = d.price_cent * 1.0 / 100.0
-    date_start_style = ""
-    date_end_syle = ""
     s = f"""{format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
     return s
 
@@ -198,7 +195,6 @@ def i_discount(
         item = ITEMS[LAST_BEST_MATCH_ITEM_ID]
     else:
         raise ValueError("No itemid given")
-
 
     if store is None and LAST_STORE is not None:
         store = LAST_STORE
