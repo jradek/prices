@@ -38,14 +38,14 @@ function processRow(data) {
     </div>
     <div>
       <span class="my-price-background green lighten-2 center" style="${style}">${min_price.toFixed(
-        2
-      )}&euro;</span>
+    2
+  )}&euro;</span>
       <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price.toFixed(
-        2
-      )}&euro;</span>
+    2
+  )}&euro;</span>
       <span class="my-price-background red lighten-2 center" style="${style}">${max_price.toFixed(
-        2
-      )}&euro;</span>
+    2
+  )}&euro;</span>
       <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
     </div>
   </div>
@@ -61,10 +61,13 @@ const numberSorter = (a, b) => a - b;
 function formatStores(data) {
   const pricesPerServing = data
     .map((it) => {
-      return it[2];
+      // order by min_price
+      return it[1];
     })
     .sort(numberSorter);
 
+  // get minimal min_price_per_serving, and maximal min_price_per_serving
+  // to highlight the store appropriately
   const minPrice = pricesPerServing[0];
   const maxPrice = pricesPerServing.pop();
   const rows = data.map((it) => formatStoreRow(it, minPrice, maxPrice));
@@ -74,10 +77,10 @@ function formatStores(data) {
   <thead>
     <tr>
       <th>Store</th>
-      <th>Regular</th>
       <th>Min</th>
       <th>Average</th>
       <th>Max</th>
+      <th>Regular</th>
       <th>#</th>
     </tr>
   </thead>
@@ -90,15 +93,15 @@ function formatStores(data) {
 function formatStoreRow(row, overallMinPrice, overallMaxPrice) {
   // console.log(row);
   const store = row[0];
-  const regular_price = row[1];
-  const min_price = row[2];
-  const avg_price = row[3];
-  const max_price = row[4];
+  const min_price = row[1];
+  const avg_price = row[2];
+  const max_price = row[3];
+  const regular_price = row[4];
   const num_measures = row[5];
 
-  let regular_price_str = ""
+  let regular_price_str = "";
   if (regular_price != undefined) {
-    regular_price_str = `${regular_price.toFixed(2)}&euro;`
+    regular_price_str = `${regular_price.toFixed(2)}&euro;`;
   }
 
   const storeColors = g_storeToColor[store] || [
@@ -120,10 +123,10 @@ function formatStoreRow(row, overallMinPrice, overallMaxPrice) {
   <td><span class="my-store-background ${storeColors[1]} ${
     storeColors[2]
   }">${store}</span></td>
-  <td>${regular_price_str}</td>
   <td>${min_price.toFixed(2)}&euro;</td>
   <td>${avg_price.toFixed(2)}&euro;</td>
   <td>${max_price.toFixed(2)}&euro;</td>
+  <td>${regular_price_str}</td>
   <td>${num_measures}</td>
 </tr>
   `;

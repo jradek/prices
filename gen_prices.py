@@ -50,7 +50,7 @@ def get_min_prices(con: sqlite3.Connection) -> pd.DataFrame:
 	LEFT JOIN (
 		SELECT r.item_id, i.name, r.store, r.amount, r.price_cent, i.serving_size * r.price_cent * 1.0 / r.amount / 100.0 AS "regular_per_serving"
 		FROM regular r
-		INNER JOIN item i ON i.id = r.item_id 
+		INNER JOIN item i ON i.id = r.item_id
 		GROUP BY store, item_id
 		HAVING MAX(date)
 	) AS regular ON per_store.store = regular.store AND per_store.id = regular.item_id
@@ -99,6 +99,7 @@ def write_javascript(prices_df: pd.DataFrame):
         fp.write("g_prices = [\n")
 
         is_first = True
+        explain_entries = True
         for row in prices_df.iterrows():
             row_idx = row[0]
             series = row[1]
@@ -111,19 +112,28 @@ def write_javascript(prices_df: pd.DataFrame):
 
             entry = row[1]
 
-            regular_per_serving = "null" if math.isnan(entry['regular_per_serving']) else entry['regular_per_serving']
+            regular_per_serving = (
+                "null"
+                if math.isnan(entry["regular_per_serving"])
+                else entry["regular_per_serving"]
+            )
+
             if entry["store"] == "_all_stores_":
                 line = ""
                 if not is_first:
-                    line = "]],\n"
-                line += f"""[{entry['id']}, "{entry['name']}", {entry['min_price_per_serving']}, {entry['avg_price_per_serving']}, {entry['max_price_per_serving']}, {entry['serving_size']}, "{entry['unit']}", "{entry['category']}", {entry['num_measures']}, [\n"""
+                    line = "  ]\n],\n"
+                line += f"""[{entry['id']}, "{entry['name']}", {entry['min_price_per_serving']}, {entry['avg_price_per_serving']}, {entry['max_price_per_serving']}, {entry['serving_size']}, "{entry['unit']}", "{entry['category']}", {entry['num_measures']},\n  [\n"""
                 fp.write(line)
                 is_first = False
             else:
-                line = f"""[\"{entry["store"]}\", {regular_per_serving}, {entry["min_price_per_serving"]}, {entry["avg_price_per_serving"]}, {entry["max_price_per_serving"]}, {entry["num_measures"]}],\n"""
+                if explain_entries:
+                    line = "// 0: store, 1: min_price_per_serving, 2: avg_price_per_serving, 3: max_price_per_serving, 4: regular_price_per_serving, 5: num_measures\n"
+                    fp.write(line)
+                    explain_entries = False
+                line = f"""    [\"{entry["store"]}\", {entry["min_price_per_serving"]}, {entry["avg_price_per_serving"]}, {entry["max_price_per_serving"]}, {regular_per_serving}, {entry["num_measures"]}],\n"""
                 fp.write(line)
 
-        fp.write("]]\n]; // prices\n\n")
+        fp.write("  ]\n]\n]; // prices\n\n")
 
         fp.write("// </script>\n\n")
 
