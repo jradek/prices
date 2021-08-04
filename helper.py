@@ -158,15 +158,28 @@ def i_setup():
 
 
 def i_fz_search(name: str, **kwargs):
+    """Fuzzy search the item list
+
+    Best matching item is automatically cached and used for
+    next discount, if not overwritten
+
+    name : str
+        portion to search in item name
+    **kwargs :
+        additional arguments for fz_search()
+    """
+
     global ITEMS, LAST_BEST_MATCH_ITEM_ID
     results = fz_search(ITEMS, name, **kwargs)
     for idx, item in enumerate(results):
         if idx == 0:
             LAST_BEST_MATCH_ITEM_ID = item.item_id
-        CONSOLE.print(item)
+            CONSOLE.print(f"* {item}")
+        else:
+            CONSOLE.print(f"  {item}")
 
 
-def i_discount(
+def i_add_discount(
     amount: int,
     price_cent: int,
     store: Optional[str] = None,
@@ -174,6 +187,22 @@ def i_discount(
     start: Optional[str] = None,
     end: Optional[str] = None,
 ):
+    """Add new discount to list
+
+    amount : int
+        amount expressed in item unit
+    price_cent : int
+        price in cent
+    item_id : int, optional
+        item identifier, or last best match of 'i_fz_search'
+    store : str, optional
+        store to use, or last used one
+    start : str, optional
+        start deal date, or last monday
+    end : str, optional
+        end deal date, or next saturday
+    """
+
     global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE
 
     start_date = parse_date(MONDAY)
@@ -194,25 +223,32 @@ def i_discount(
     elif LAST_BEST_MATCH_ITEM_ID >= 0:
         item = ITEMS[LAST_BEST_MATCH_ITEM_ID]
     else:
-        raise ValueError("No itemid given")
+        raise ValueError("No item_id given")
 
     if store is None and LAST_STORE is not None:
         store = LAST_STORE
 
     LAST_STORE = store
+    if store is None:
+        raise ValueError("No store given")
 
     discount = Discount(start_date, end_date, store, item.item_id, amount, price_cent)
     CONSOLE.print(i_format_discount(discount))
 
     res = input("Is this correct [yN]? ")
     if res.lower() == "y":
-        CONSOLE.print("... discount added", style="green")
         DISCOUNTS.append(discount)
-    else:
-        CONSOLE.print("... discount rejected", style="red")
+        l = len(DISCOUNTS)
+        CONSOLE.print(f"... discount added ({l} on list)", style="green")
 
 
 def i_alpha_items(start: Optional[str] = None):
+    """Show items in alphabetical order
+
+    start : str, optional
+        start with this letter
+    """
+
     global ITEMS
     for idx, item in enumerate(alpha_items(ITEMS, start)):
         if (idx > 0) and (idx % 10 == 0):
@@ -226,8 +262,23 @@ def i_show_discounts():
         CONSOLE.print(f"{idx:02d}: {i_format_discount(d)}")
 
 
-def i_delete_discount(idx: int):
+def i_delete_discount(idx: Optional[int] = None):
+    """Delete discount from list
+
+    idx : int, optional
+        delete discount at this position, or the last one
+    """
+
     global CONSOLE, DISCOUNTS
+    if idx is None and len(DISCOUNTS) > 0:
+        last_item = DISCOUNTS[-1]
+        CONSOLE.print(f"{i_format_discount(last_item)}")
+        res = input("Delete this item [yN]? ")
+        if res.lower() == "y":
+            del DISCOUNTS[-1]
+
+        return
+
     try:
         DISCOUNTS.pop(idx)
     except Exception as e:
@@ -235,6 +286,11 @@ def i_delete_discount(idx: int):
 
 
 def i_dump_sql() -> str:
+    """Dump discount list to file 'new_discounts.sql'
+
+    The file contains the appropriate SQL INSERT statements
+    """
+
     global DISCOUNTS, CONSOLE
     last_id = get_last_discount_id()
 
@@ -249,6 +305,30 @@ def i_dump_sql() -> str:
     with open(fn, "a") as fp:
         fp.write(lines)
         CONSOLE.print(f"Wrote {fn}", style="green")
+
+
+def i_create_demo():
+    global MONDAY, SATURDAY, LAST_BEST_MATCH_ITEM_ID, LAST_STORE, DISCOUNTS, CONSOLE
+
+    if len(DISCOUNTS) > 0:
+        res = input("Discounts not empty. Overwrite with demo data [yN]?")
+        if res.lower() != "y":
+            return
+
+    DISCOUNTS.clear()
+
+    DISCOUNTS.append(Discount(MONDAY, SATURDAY, "lidl", 12, 10, 159))
+    DISCOUNTS.append(Discount("2021-08-06", SATURDAY, "kaufland", 53, 500, 199))
+
+    LAST_STORE = "kaufland"
+    LAST_BEST_MATCH_ITEM_ID = 53
+    MONDAY, SATURDAY = "2021-08-02", "2021-08-07"
+
+    i_show_discounts()
+    CONSOLE.print(f"{LAST_STORE=}")
+    CONSOLE.print(f"{LAST_BEST_MATCH_ITEM_ID=}")
+    CONSOLE.print(f"{MONDAY=}")
+    CONSOLE.print(f"{SATURDAY=}")
 
 
 def main():
