@@ -25,7 +25,9 @@ def write_javascript(offers_df: pd.DataFrame):
 
         # export time
         export_date = datetime.datetime.now()
-        fp.write(f'g_exportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n')
+        fp.write(
+            f'g_offersExportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n'
+        )
 
         # offers
         fp.write("g_offers = [\n")

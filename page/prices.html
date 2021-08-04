@@ -46,6 +46,9 @@
     <div class="container">
       <!-- START Page Content -->
       <h1 class="center">Prices</h1>
+
+      <p class="center" style="font-size: small" id="exportDate"></p>
+
       <ul id="root" class="collapsible">
         <li>
           <div class="collapsible-header">
@@ -116,6 +119,9 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        elem = document.getElementById("exportDate");
+        elem.innerHTML = `generated at ${g_pricesExportDate}`;
+
         generatePrices();
 
         var elems = document.querySelectorAll(".collapsible");

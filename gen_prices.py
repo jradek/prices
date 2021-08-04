@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 
+import datetime
 import logging
 import math
 import sqlite3
@@ -94,6 +95,12 @@ def write_javascript(prices_df: pd.DataFrame):
 
     with open(fn, "w") as fp:
         fp.write("// <script>\n\n")
+
+        # export time
+        export_date = datetime.datetime.now()
+        fp.write(
+            f'g_pricesExportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n'
+        )
 
         # prices
         fp.write("g_prices = [\n")
