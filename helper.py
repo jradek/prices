@@ -303,6 +303,7 @@ def i_dump_sql() -> str:
 
     fn = "new_discounts.sql"
     with open(fn, "a") as fp:
+        fp.write("\n\n\n")
         fp.write(lines)
         CONSOLE.print(f"Wrote {fn}", style="green")
 
