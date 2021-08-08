@@ -2612,6 +2612,7 @@ INSERT INTO item VALUES(96,'Bio Eier',1,'Stueck','egg');
 INSERT INTO item VALUES(97,'Kopfsalat',1,'Stueck','vegetable');
 INSERT INTO item VALUES(98,'Zucchini',100,'g','vegetable');
 INSERT INTO item VALUES(99,'Hirtenkaese',100,'g','vegetable');
+INSERT INTO item VALUES(100,'Harzer Kaese',100,'g','dairy');
 CREATE TABLE regular (
 	id INTEGER NOT NULL,
 	date TEXT,
@@ -2640,4 +2641,6 @@ INSERT INTO regular VALUES(15,'2021-07-30','lidl',16,750,299);
 INSERT INTO regular VALUES(16,'2021-07-30','netto',16,750,299);
 INSERT INTO regular VALUES(17,'2021-07-30','penny',16,750,299);
 INSERT INTO regular VALUES(18,'2021-07-30','rewe',16,750,299);
+INSERT INTO regular VALUES(19,'2021-08-05','penny',100,200,159);
+INSERT INTO regular VALUES(20,'2021-08-07','kaufland',100,200,119);
 COMMIT;
