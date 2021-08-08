@@ -113,12 +113,12 @@ def format_date(s: str):
     return d.strftime("%A (%Y-%m-%d)")
 
 
-def parse_date(s: str):
+def parse_date(s: str) -> Tuple[str, datetime.datetime]:
     """
     raise ValueError
     """
-    datetime.datetime.strptime(s, "%Y-%m-%d")
-    return s
+    d = datetime.datetime.strptime(s, "%Y-%m-%d")
+    return s, d
 
 
 # =====================================================================
@@ -130,8 +130,10 @@ ITEMS = {}
 STORES = set()
 LAST_BEST_MATCH_ITEM_ID = -1
 LAST_STORE = None
-MONDAY = ""
-SATURDAY = ""
+MONDAY = None
+SATURDAY = None
+LAST_START = None
+LAST_END = None
 DISCOUNTS: List[Discount] = []
 CONSOLE = None
 
@@ -150,10 +152,12 @@ def i_format_discount(d: Discount, con=CONSOLE) -> str:
 
 
 def i_setup():
-    global ITEMS, STORES, MONDAY, SATURDAY, CONSOLE
+    global ITEMS, STORES, MONDAY, SATURDAY, CONSOLE, LAST_START, LAST_END
     ITEMS = get_items()
     STORES = get_stores()
     MONDAY, SATURDAY = get_monday_saturday()
+    LAST_START = MONDAY
+    LAST_END = SATURDAY
     CONSOLE = rich.console.Console()
 
 
@@ -198,23 +202,40 @@ def i_add_discount(
     store : str, optional
         store to use, or last used one
     start : str, optional
-        start deal date, or last monday
+        start deal date, or last monday. Format yyyy-mm-dd
     end : str, optional
-        end deal date, or next saturday
+        end deal date, or next saturday. Format yyyy-mm-dd or '+dd' as offset to start date
     """
 
-    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE
+    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE, LAST_START, LAST_END
 
-    start_date = parse_date(MONDAY)
-    end_date = parse_date(SATURDAY)
+    # start date handling
+    start_date_str, start_date = parse_date(MONDAY)
+    end_date_str, end_date = parse_date(SATURDAY)
     if start is not None:
-        start_date = parse_date(start)
+        start_date_str, start_date = parse_date(start)
+    elif LAST_START is not None:
+        start_date_str, start_date = parse_date(LAST_START)
 
+    LAST_START = start_date_str
+
+    # end date handling
     if end is not None:
-        end_date = parse_date(end)
+        # offset
+        if isinstance(end, str) and end.startswith("+"):
+            end_date = start_date + datetime.timedelta(days=float(end[1:]))
+            end_date_str = datetime.datetime.strftime(end_date, "%Y-%m-%d")
+        else:
+            end_date_str, end_date = parse_date(end)
+    elif LAST_END is not None:
+        end_date_str, end_date = parse_date(LAST_END)
 
-    if start_date > end_date:
-        CONSOLE.print(f"Invalid date range {start_date} - {end_date}", style="red")
+    LAST_END = end_date_str
+
+    if start_date_str > end_date_str:
+        CONSOLE.print(
+            f"Invalid date range {start_date_str} - {end_date_str}", style="red"
+        )
         return
 
     item = None
@@ -232,7 +253,9 @@ def i_add_discount(
     if store is None:
         raise ValueError("No store given")
 
-    discount = Discount(start_date, end_date, store, item.item_id, amount, price_cent)
+    discount = Discount(
+        start_date_str, end_date_str, store, item.item_id, amount, price_cent
+    )
     CONSOLE.print(i_format_discount(discount))
 
     res = input("Is this correct [yN]? ")
