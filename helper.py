@@ -138,6 +138,41 @@ DISCOUNTS: List[Discount] = []
 CONSOLE = None
 
 
+def i_show_current_values():
+    """Displays current (saved) values"""
+
+    global LAST_START, LAST_END, LAST_STORE, LAST_BEST_MATCH_ITEM_ID, ITEMS, CONSOLE
+
+    s = ""
+    if LAST_START is not None:
+        s += f"{format_date(LAST_START)}"
+    else:
+        s += "?start?"
+
+    s += " - "
+
+    if LAST_END is not None:
+        s += f"{format_date(LAST_END)}"
+    else:
+        s += "?end?"
+
+    if LAST_STORE is not None:
+        s += f", {LAST_STORE}"
+    else:
+        s += ", ?store?"
+
+    if isinstance(LAST_BEST_MATCH_ITEM_ID, int):
+        try:
+            item = ITEMS[LAST_BEST_MATCH_ITEM_ID]
+            s += f", {item.name} {item.serving_size}{item.unit}"
+        except Exception:
+            s += ", ?item?"
+    else:
+        s += ", ?item"
+
+    CONSOLE.print(s)
+
+
 def i_format_discount(d: Discount, con=CONSOLE) -> str:
     global ITEMS, STORES
     store_opt_start = ""
@@ -160,6 +195,8 @@ def i_setup():
     LAST_END = SATURDAY
     CONSOLE = rich.console.Console()
 
+    i_show_current_values()
+
 
 def i_fz_search(name: str, **kwargs):
     """Fuzzy search the item list
@@ -181,6 +218,8 @@ def i_fz_search(name: str, **kwargs):
             CONSOLE.print(f"* {item}")
         else:
             CONSOLE.print(f"  {item}")
+
+    i_show_current_values()
 
 
 def i_add_discount(
@@ -232,12 +271,14 @@ def i_add_discount(
 
     LAST_END = end_date_str
 
+    # consistency
     if start_date_str > end_date_str:
         CONSOLE.print(
             f"Invalid date range {start_date_str} - {end_date_str}", style="red"
         )
         return
 
+    # item handling
     item = None
     if item_id is not None:
         item = ITEMS[item_id]
@@ -246,15 +287,15 @@ def i_add_discount(
     else:
         raise ValueError("No item_id given")
 
-    if store is None and LAST_STORE is not None:
-        store = LAST_STORE
+    # store handling
+    if store is not None:
+        LAST_STORE = store
 
-    LAST_STORE = store
-    if store is None:
+    if LAST_STORE is None:
         raise ValueError("No store given")
 
     discount = Discount(
-        start_date_str, end_date_str, store, item.item_id, amount, price_cent
+        LAST_START, LAST_END, LAST_STORE, item.item_id, amount, price_cent
     )
     CONSOLE.print(i_format_discount(discount))
 
@@ -263,6 +304,8 @@ def i_add_discount(
         DISCOUNTS.append(discount)
         l = len(DISCOUNTS)
         CONSOLE.print(f"... discount added ({l} on list)", style="green")
+
+    i_show_current_values()
 
 
 def i_alpha_items(start: Optional[str] = None):
