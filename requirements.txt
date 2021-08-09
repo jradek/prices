@@ -2,4 +2,3 @@ fuzzywuzzy
 python-Levenshtein
 pandas
 rich
-sqlalchemy

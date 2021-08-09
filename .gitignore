@@ -2,7 +2,6 @@
 __pycache__/
 
 new_discounts.sql
-google_export/
 page/current_offers_data.js
 page/prices_data.js
 tmp/
