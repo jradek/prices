@@ -21,10 +21,10 @@ function processRow(data) {
   const serving_size = data[2];
   const unit = data[3];
   const category = data[4];
-  const min_price = data[5] ? `${data[5].toFixed(2)}&euro;` : "";
-  const avg_price = data[6] ? `${data[6].toFixed(2)}&euro;` : "";
-  const max_price = data[7] ? `${data[7].toFixed(2)}&euro;` : "";
-  const num_measures = data[8] ? data[8].toFixed(0) : "";
+  const min_price = data[5] ? `${data[5].toFixed(2)}&euro;` : "&nbsp;";
+  const avg_price = data[6] ? `${data[6].toFixed(2)}&euro;` : "&nbsp;";
+  const max_price = data[7] ? `${data[7].toFixed(2)}&euro;` : "&nbsp;";
+  const num_measures = data[8] ? `# ${data[8].toFixed(0)}` : "";
   const categoryClasses = g_categories[category] || "fas fa-question";
   const per_store_html = formatStores(itemId);
 
@@ -41,7 +41,7 @@ function processRow(data) {
       <span class="my-price-background green lighten-2 center" style="${style}">${min_price}</span>
       <span class="my-price-background yellow lighten-2 center" style="${style}">${avg_price}</span>
       <span class="my-price-background red lighten-2 center" style="${style}">${max_price}</span>
-      <span class="center" style="${style}; font-weight: bold"># ${num_measures}</span>
+      <span class="center" style="${style}; font-weight: bold">${num_measures}</span>
     </div>
   </div>
   <div class="collapsible-body">
@@ -56,9 +56,29 @@ const numberSorter = (a, b) => a - b;
 function formatStores(itemId) {
   const perStoreData = g_pricesPerStore[itemId];
 
+  let minPrices = []
+  for (const idx in perStoreData) {
+    const p = perStoreData[idx][2];
+    if (p) {
+      minPrices.push(p)
+    }
+  }
+
+  minPrices = minPrices.sort(numberSorter)
+  // console.log(minPrices)
+
+  let minPrice = 0;
+  if (minPrices.length > 0) {
+    minPrice = minPrices[0];
+  }
+  let maxPrice = 1000;
+  if (minPrices.length > 0) {
+    maxPrice = minPrices.pop();
+  }
+
   let rows = [];
   for (const idx in perStoreData) {
-    let row = formatStoreRow(perStoreData[idx])
+    let row = formatStoreRow(perStoreData[idx], minPrice, maxPrice)
     rows.push(row)
   }
 
@@ -86,6 +106,7 @@ function formatStoreRow(data, overallMinPrice, overallMaxPrice) {
 // 0: item_id, 1: store, 2: min_price_per_serving, 3: min_date, 4: avg_price_per_serving, 5: max_price_per_serving, 6: max_date, 7: num_measures, 8: regular_price_per_serving, 9: regular_date
 
   const store = data[1];
+  const min_price = data[2] ? data[2] : null;
   const min_price_per_serving = data[2] ? `${data[2].toFixed(2)}&euro;` : "";
   const min_date = data[3] ? data[3] : "";
   const avg_price_per_serving = data[4] ? `${data[4].toFixed(2)}&euro;` : "";
@@ -103,11 +124,11 @@ function formatStoreRow(data, overallMinPrice, overallMaxPrice) {
 
   // mark best/worst min price per serving
   let rowStyle = "";
-  // if (min_price < overallMinPrice + 0.01) {
-  //   rowStyle = "green lighten-5";
-  // } else if (min_price > overallMaxPrice - 0.01) {
-  //   rowStyle = "red lighten-5";
-  // }
+  if (min_price && (min_price < overallMinPrice + 0.01)) {
+    rowStyle = "green lighten-5";
+  } else if (min_price && (min_price > overallMaxPrice - 0.01)) {
+    rowStyle = "red lighten-5";
+  }
 
   return `
 <tr class="${rowStyle}">
