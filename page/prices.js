@@ -56,7 +56,8 @@ const numberSorter = (a, b) => a - b;
 function formatStores(itemId) {
   const perStoreData = g_pricesPerStore[itemId];
 
-  let minPrices = []
+  // determine the overall min price per serving for all stores
+  let minPrices = [];
   for (const idx in perStoreData) {
     const p = perStoreData[idx][2];
     if (p) {
@@ -65,8 +66,8 @@ function formatStores(itemId) {
   }
 
   minPrices = minPrices.sort(numberSorter)
-  // console.log(minPrices)
 
+  // min and max price per serving across stores
   let minPrice = 0;
   if (minPrices.length > 0) {
     minPrice = minPrices[0];
