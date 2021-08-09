@@ -55,78 +55,96 @@ ORDER BY
     return df
 
 
-def get_min_prices(con: sqlite3.Connection) -> pd.DataFrame:
-    stmt = """
-	SELECT
-		per_store.id,
-		per_store.name,
-		per_store.store,
-		per_store.min_price_per_serving,
-		per_store.avg_price_per_serving,
-		per_store.max_price_per_serving,
-		per_store.serving_size,
-		per_store.unit,
-        per_store.category,
-		per_store.num_measures,
-        regular.regular_per_serving
-	FROM(
-		SELECT
-			i.id,
-			i.name,
-			d.store,
-			i.unit,
-			i.serving_size,
-            i.category,
-			MIN(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "min_price_per_serving",
-			ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0, 2) AS "avg_price_per_serving",
-			MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
-			COUNT(*) AS "num_measures"
-		FROM discount d
-		INNER JOIN item i ON i.id = d.item_id
-		GROUP BY d.item_id, d.store
-	) AS per_store
-	LEFT JOIN (
-		SELECT r.item_id, i.name, r.store, r.amount, r.price_cent, i.serving_size * r.price_cent * 1.0 / r.amount / 100.0 AS "regular_per_serving"
-		FROM regular r
-		INNER JOIN item i ON i.id = r.item_id
-		GROUP BY store, item_id
-		HAVING MAX(date)
-	) AS regular ON per_store.store = regular.store AND per_store.id = regular.item_id
-	UNION
-	SELECT
-		overall.id,
-		overall.name,
-		"_all_stores_" AS "store",
-		overall.min_price_per_serving,
-		overall.avg_price_per_serving,
-		overall.max_price_per_serving,
-		overall.serving_size,
-		overall.unit,
-        overall.category,
-		overall.num_measures,
-        null as "regular_per_serving"
-	FROM (
-		SELECT
-			i.id,
-			i.name,
-			i.unit,
-			i.serving_size,
-            i.category,
-			MIN(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "min_price_per_serving",
-			ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100, 2)  AS "avg_price_per_serving",
-			MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
-			COUNT(*) AS "num_measures"
-		FROM discount d
-		INNER JOIN item i ON i.id = d.item_id
-		GROUP BY d.item_id
-	) AS overall
-	ORDER BY name, id, store
+def get_prices_per_store(con: sqlite3.Connection) -> pd.DataFrame:
+    STORE_QUERY = """
+SELECT
+  i.id AS item_id,
+  --i.name,
+  --i.serving_size,
+  --i.unit,
+  --i.category,
+  all_stores.store,
+  min_price.min_price_per_serving,
+  min_price.min_date,
+  avg_price.avg_price_per_serving,
+  max_price.max_price_per_serving,
+  max_price.max_date,
+  max_price.num_measures,
+  regular.regular_price_per_serving,
+  regular.regular_date
+FROM
+  item i,
+  (
+    SELECT DISTINCT 
+      store 
+    FROM
+      discount
+  ) AS all_stores
+LEFT JOIN (
+  SELECT
+    i.id as item_id,
+    i.name,
+    d.store,
+    i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as min_price_per_serving,
+    d.start as min_date,
+    count(*) as num_measures
+  FROM 
+    discount d
+  INNER JOIN item i ON i.id = d.item_id
+  GROUP BY d.item_id, d.store
+  HAVING MIN(i.serving_size * d.price_cent / d.amount * 1.0)
+) AS min_price ON min_price.item_id = i.id AND min_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    i.id as item_id,
+    i.name,
+    d.store,
+    ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0)) / 100.0 AS avg_price_per_serving,
+    count(*) AS num_measures
+  FROM 
+    discount d
+  INNER JOIN item i ON i.id = d.item_id
+  GROUP BY d.item_id, d.store
+) AS avg_price ON avg_price.item_id = i.id AND avg_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    i.id as item_id,
+    i.name,
+    d.store,
+    i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as max_price_per_serving,
+    d.start as max_date,
+    count(*) as num_measures
+  FROM 
+    discount d
+  INNER JOIN item i ON i.id = d.item_id
+  GROUP BY d.item_id, d.store
+  HAVING MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0
+) AS max_price ON max_price.item_id = i.id AND max_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    r.item_id,
+    r.store,
+    r.date AS regular_date,
+    i.serving_size * r.price_cent / r.amount * 1.0 / 100.0 as regular_price_per_serving
+  FROM
+    regular r
+  INNER JOIN item i ON i.id = r.item_id
+  GROUP BY
+    r.item_id,
+    r.store
+  HAVING MAX(r.date)
+) AS regular ON regular.item_id = i.id AND regular.store = all_stores.store
+WHERE
+	(min_price.store IS not NULL) OR (regular.store is not null)
+ORDER BY
+  i.name, 
+  all_stores.store
 """
-    df = pd.read_sql(stmt, con)
+    df = pd.read_sql(STORE_QUERY, con)
     return df
 
 
-def write_javascript_2(items_df: pd.DataFrame):
+def write_javascript(items_df: pd.DataFrame, prices_per_store_df: pd.DataFrame):
     fn = CURRENT_DIR / "page" / "prices_data.js"
     fn.parent.mkdir(exist_ok=True, parents=True)
 
@@ -153,36 +171,22 @@ def write_javascript_2(items_df: pd.DataFrame):
 
             items = []
             for val in series:
-                if isinstance(val, str):
+                if val is None:
+                    items.append("null")
+                elif isinstance(val, str):
                     items.append(f'"{val}"')
                 elif math.isnan(float(val)):
                     items.append("null")
                 else:
                     items.append(str(val))
-                    
+
             fp.write(f'  [{", ".join(items)}],\n')
         fp.write("]; // items \n\n")
 
-
-def write_javascript(prices_df: pd.DataFrame):
-    fn = CURRENT_DIR / "page" / "prices_data.js"
-    fn.parent.mkdir(exist_ok=True, parents=True)
-
-    with open(fn, "w") as fp:
-        fp.write("// <script>\n\n")
-
-        # export time
-        export_date = datetime.datetime.now()
-        fp.write(
-            f'g_pricesExportDate = "{export_date.strftime("%Y-%m-%d %H:%M:%S")}"\n\n'
-        )
-
         # prices
-        fp.write("g_prices = [\n")
-
-        is_first = True
-        explain_entries = True
-        for row in prices_df.iterrows():
+        fp.write("g_pricesPerStore = {\n")
+        last_item_id = None
+        for row in prices_per_store_df.iterrows():
             row_idx = row[0]
             series = row[1]
 
@@ -191,31 +195,26 @@ def write_javascript(prices_df: pd.DataFrame):
                     [f"{idx}: {val}" for idx, val in enumerate(series.index)]
                 )
                 fp.write(f"// {line}\n")
+            if series["item_id"] != last_item_id:
+                if row_idx != 0:
+                    fp.write("],\n")
+                fp.write(f"{series['item_id']}: [\n")
 
-            entry = row[1]
+            items = []
+            for val in series:
+                if val is None:
+                    items.append("null")
+                elif isinstance(val, str):
+                    items.append(f'"{val}"')
+                elif math.isnan(float(val)):
+                    items.append("null")
+                else:
+                    items.append(str(val))
 
-            regular_per_serving = (
-                "null"
-                if math.isnan(entry["regular_per_serving"])
-                else entry["regular_per_serving"]
-            )
+            fp.write(f'  [{", ".join(items)}],\n')
 
-            if entry["store"] == "_all_stores_":
-                line = ""
-                if not is_first:
-                    line = "  ]\n],\n"
-                line += f"""[{entry['id']}, "{entry['name']}", {entry['min_price_per_serving']}, {entry['avg_price_per_serving']}, {entry['max_price_per_serving']}, {entry['serving_size']}, "{entry['unit']}", "{entry['category']}", {entry['num_measures']},\n  [\n"""
-                fp.write(line)
-                is_first = False
-            else:
-                if explain_entries:
-                    line = "// 0: store, 1: min_price_per_serving, 2: avg_price_per_serving, 3: max_price_per_serving, 4: regular_price_per_serving, 5: num_measures\n"
-                    fp.write(line)
-                    explain_entries = False
-                line = f"""    [\"{entry["store"]}\", {entry["min_price_per_serving"]}, {entry["avg_price_per_serving"]}, {entry["max_price_per_serving"]}, {regular_per_serving}, {entry["num_measures"]}],\n"""
-                fp.write(line)
-
-        fp.write("  ]\n]\n]; // prices\n\n")
+            last_item_id = series["item_id"]
+        fp.write("]\n};\n // prices per store\n\n")
 
         fp.write("// </script>\n\n")
 
@@ -223,9 +222,8 @@ def write_javascript(prices_df: pd.DataFrame):
 def main():
     with sqlite3.connect(CURRENT_DIR / "tmp" / "prices.db") as con:
         items_df = get_item_data(con)
-        write_javascript_2(items_df)
-        # df = get_min_prices(con)
-        # write_javascript(df)
+        prices_per_store_df = get_prices_per_store(con)
+        write_javascript(items_df, prices_per_store_df)
 
 
 if __name__ == "__main__":
