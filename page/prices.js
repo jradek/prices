@@ -55,33 +55,29 @@ const numberSorter = (a, b) => a - b;
 
 function formatStores(itemId) {
   const perStoreData = g_pricesPerStore[itemId];
+ 
+  // no data for this item available
+  if(!perStoreData) {
+    return ""
+  }
 
   // determine the overall min price per serving for all stores
-  let minPrices = [];
-  for (const idx in perStoreData) {
-    const p = perStoreData[idx][2];
-    if (p) {
-      minPrices.push(p)
-    }
-  }
+  // get value and filter 'null'
+  let minPrices = perStoreData.map(it => it[2]).filter(x => x)
 
   minPrices = minPrices.sort(numberSorter)
 
   // min and max price per serving across stores
   let minPrice = 0;
-  if (minPrices.length > 0) {
-    minPrice = minPrices[0];
-  }
   let maxPrice = 1000;
   if (minPrices.length > 0) {
+    minPrice = minPrices[0];
     maxPrice = minPrices.pop();
   }
 
-  let rows = [];
-  for (const idx in perStoreData) {
-    let row = formatStoreRow(perStoreData[idx], minPrice, maxPrice)
-    rows.push(row)
-  }
+  const rows = perStoreData.map(store => { 
+    return formatStoreRow(store, minPrice, maxPrice)
+  })
 
   return `
 <table>
