@@ -14,11 +14,10 @@ query="
 SELECT 
     d.start, 
     d.end, 
-    printf('%12s', d.store), 
+    printf('%15s', d.store), 
     printf('%3d', i.id),
-    printf('%45s', i.name), 
-    printf('%4d', d.amount), 
-    printf('%6s', i.unit), 
+    printf('%40s', i.name), 
+    printf('%4d%-6s', d.amount, i.unit),
     printf('%2.2f€',(d.price_cent * 0.01)) AS price
 FROM discount d
 INNER JOIN item i ON d.item_id = i.id
