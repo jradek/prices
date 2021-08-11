@@ -2625,6 +2625,7 @@ INSERT INTO item VALUES(98,'Zucchini',100,'g','vegetable',100);
 INSERT INTO item VALUES(99,'Hirtenkaese',100,'g','vegetable',NULL);
 INSERT INTO item VALUES(100,'Harzer Kaese',100,'g','dairy',200);
 INSERT INTO item VALUES(101,'Rinderleber',100,'g','meat',500);
+INSERT INTO item VALUES(102,'Rinderherz',100,'g','meat',500);
 CREATE TABLE regular (
 	id INTEGER NOT NULL,
 	date TEXT,
@@ -2668,4 +2669,5 @@ INSERT INTO regular VALUES(30,'2021-08-10','kaufland',32,250,249);
 INSERT INTO regular VALUES(31,'2021-08-10','kaufland',36,700,379);
 INSERT INTO regular VALUES(32,'2021-08-10','kaufland',75,1,79);
 INSERT INTO regular VALUES(33,'2021-08-10','kaufland',48,750,299);
+INSERT INTO regular VALUES(34,'2021-08-11','kaufland',102,1000,399);
 COMMIT;
