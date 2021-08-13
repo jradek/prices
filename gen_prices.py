@@ -21,6 +21,21 @@ LOGGER = logging.getLogger("gen_prices")
 def get_item_data(con: sqlite3.Connection) -> pd.DataFrame:
     # query item data and min/avg/max per store
     ITEM_QUERY = """
+WITH overall AS (
+ SELECT
+    i.id,
+    i.name,
+    MIN(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "min_price_per_serving",
+    ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100, 2)  AS "avg_price_per_serving",
+    MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
+    COUNT(*) AS "num_measures"
+  FROM
+	discount d
+  INNER JOIN
+    item i ON i.id = d.item_id
+  GROUP BY
+    d.item_id
+)
 SELECT
   i.id,
   i.name,
@@ -34,21 +49,7 @@ SELECT
   overall.num_measures
 FROM
   item i
-LEFT JOIN (
-  SELECT
-    i.id,
-    i.name,
-    MIN(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "min_price_per_serving",
-    ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100, 2)  AS "avg_price_per_serving",
-    MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
-    COUNT(*) AS "num_measures"
-  FROM
-	discount d
-  INNER JOIN
-    item i ON i.id = d.item_id
-  GROUP BY
-    d.item_id
-  ) AS overall ON overall.id = i.id
+LEFT JOIN overall ON overall.id = i.id
 ORDER BY
   i.name
 """
