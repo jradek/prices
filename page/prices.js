@@ -65,7 +65,7 @@ function processRow(data) {
 
   const categoryClasses = g_categories[category] || "fas fa-question";
 
-  const perServingHtml = formatStores(itemId);
+  const perServingHtml = formatStoresPerServing(itemId);
 
   const style = "width: 80px; float: left";
 
@@ -77,7 +77,7 @@ function processRow(data) {
         serving_size,
         usual_package_size,
         perServingHtml,
-        "Micha"
+        name
       )
     : perServingHtml;
 
@@ -104,7 +104,7 @@ function processRow(data) {
 // https://raddevon.com/articles/sort-array-numbers-javascript/
 const numberSorter = (a, b) => a - b;
 
-function formatStores(itemId) {
+function formatStoresPerServing(itemId) {
   const perStoreData = g_pricesPerStore[itemId];
 
   // no data for this item available
@@ -127,7 +127,7 @@ function formatStores(itemId) {
   }
 
   const rows = perStoreData.map((store) => {
-    return formatStoreRow(store, minPrice, maxPrice);
+    return formatPerServingStoreRow(store, minPrice, maxPrice);
   });
 
   return `
@@ -148,7 +148,7 @@ function formatStores(itemId) {
 </table>`;
 }
 
-function formatStoreRow(data, overallMinPrice, overallMaxPrice) {
+function formatPerServingStoreRow(data, overallMinPrice, overallMaxPrice) {
   // console.log(row);
   // 0: item_id, 1: store, 2: min_price_per_serving, 3: min_date, 4: avg_price_per_serving, 5: max_price_per_serving, 6: max_date, 7: num_measures, 8: regular_price_per_serving, 9: regular_date
 
