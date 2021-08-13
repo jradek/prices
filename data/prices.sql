@@ -8,7 +8,10 @@ CREATE TABLE discount (
 	item_id INTEGER,
 	amount INTEGER,
 	price_cent INTEGER,
-	PRIMARY KEY (id)
+	PRIMARY KEY (id),
+	FOREIGN KEY (item_id) REFERENCES item (id)
+		ON UPDATE CASCADE
+		ON DELETE SET NULL
 );
 INSERT INTO discount VALUES(0,'2020-04-09','2020-04-15','kaufland',24,500,199);
 INSERT INTO discount VALUES(1,'2020-04-09','2020-04-15','kaufland',38,700,899);
@@ -2634,6 +2637,9 @@ CREATE TABLE regular (
 	amount INTEGER,
 	price_cent INTEGER,
 	PRIMARY KEY (id)
+	FOREIGN KEY (item_id) REFERENCES item (id)
+		ON UPDATE CASCADE
+		ON DELETE SET NULL
 );
 INSERT INTO regular VALUES(0,'2021-01-01','kaufland',12,10,129);
 INSERT INTO regular VALUES(1,'2021-01-01','aldi',12,10,129);
