@@ -43,13 +43,33 @@
     </style>
   </head>
   <body>
+    <div class="navbar-fixed">
+      <nav>
+        <div class="nav-wrapper light-blue">
+          <span class="brand-logo center">Prices</span>
+          <ul id="nav-mobile" class="right">
+            <li>
+              <a id="my-up-chevron" href="#dummy"
+                ><i class="fa fa-chevron-up" style="width: 1cm"></i
+              ></a>
+            </li>
+            <li>
+              <a id="my-down-chevron" href="#dummy"
+                ><i class="fa fa-chevron-down" style="width: 1cm"></i
+              ></a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+    </div>
+
+    <div id="my-top-div"></div>
     <div class="container">
       <!-- START Page Content -->
-      <h1 class="center">Prices</h1>
 
       <p class="center" style="font-size: small" id="exportDate"></p>
 
-      <ul class="collapsible">
+      <!-- <ul class="collapsible">
         <li>
           <div class="collapsible-header">
             <i class="material-icons">filter_drama</i>First
@@ -77,69 +97,12 @@
             <span>Lorem ipsum dolor sit amet.</span>
           </div>
         </li>
-      </ul>
+      </ul> -->
 
-      <ul id="root" class="collapsible">
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">filter_drama</i>
-            Hackfleisch (100g)&nbsp;
-            <span class="green-text">1&euro;</span>
-            <span class="yellow-text">&nbsp;2&euro;</span>
-            <span class="red-text">&nbsp;3&euro;</span>
-            (#10)
-          </div>
-          <div class="collapsible-body">
-            <table>
-              <thead>
-                <tr>
-                  <th>Store</th>
-                  <th>Min</th>
-                  <th>Avg</th>
-                  <th>Max</th>
-                  <th>#</th>
-                </tr>
-              </thead>
-
-              <tbody>
-                <tr>
-                  <td>Aldi</td>
-                  <td>1</td>
-                  <td>2</td>
-                  <td>3</td>
-                  <td>10</td>
-                </tr>
-                <tr>
-                  <td>Netto</td>
-                  <td>1.20</td>
-                  <td>1.99</td>
-                  <td>2.5</td>
-                  <td>11</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">place</i>Second
-          </div>
-          <div class="collapsible-body">
-            <span>Lorem ipsum dolor sit amet.</span>
-          </div>
-        </li>
-        <li>
-          <div class="collapsible-header">
-            <i class="material-icons">whatshot</i>Third
-          </div>
-          <div class="collapsible-body">
-            <span>Lorem ipsum dolor sit amet.</span>
-          </div>
-        </li>
-      </ul>
+      <ul id="root" class="collapsible"></ul>
       <!-- END Page Content -->
     </div>
-    <div id="bottom"></div>
+    <div id="my-bottom-div"></div>
 
     <!-- <?!= include("prices_data_js"); ?> -->
     <script src="prices_data.js"></script>
@@ -161,6 +124,23 @@
 
         elems = document.querySelectorAll(".tabs");
         instances = M.Tabs.init(elems, options);
+
+        // navigation
+        // The google web app prevents us from using the standard anchor/href approach
+        const topDiv = document.getElementById("my-top-div");
+        const bottomDiv = document.getElementById("my-bottom-div");
+        document
+          .getElementById("my-up-chevron")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            topDiv.scrollIntoView();
+          });
+        document
+          .getElementById("my-down-chevron")
+          .addEventListener("click", (e) => {
+            e.preventDefault();
+            bottomDiv.scrollIntoView();
+          });
       });
     </script>
   </body>
