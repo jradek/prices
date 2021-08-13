@@ -43,19 +43,26 @@
   <body>
     <div class="navbar-fixed">
       <nav>
-        <div class="nav-wrapper center green">
-          <a href="#" class="brand-logo">Current Offers</a>
+        <div class="nav-wrapper light-green">
+          <span class="brand-logo center">Current Offers</span>
           <ul id="nav-mobile" class="right">
             <li>
-              <a href="#"><i class="fa fa-chevron-up"></i></a>
+              <a id="my-up-chevron" href="#dummy"
+                ><i class="fa fa-chevron-up" style="width: 1cm"></i
+              ></a>
             </li>
             <li>
-              <a href="#bottom"><i class="fa fa-chevron-down"></i></a>
+              <a id="my-down-chevron" href="#dummy"
+                ><i class="fa fa-chevron-down" style="width: 1cm"></i
+              ></a>
             </li>
           </ul>
         </div>
       </nav>
     </div>
+
+    <div id="my-top-div"></div>
+
     <div class="container">
       <!-- START Page Content -->
 
@@ -123,9 +130,9 @@
 
       <ul id="root"></ul>
       <!-- END Page Content -->
-
-      <a name="bottom"></a>
     </div>
+
+    <div id="my-bottom-div"></div>
 
     <!-- <?!= include("current_offers_data_js"); ?> -->
     <script src="current_offers_data.js"></script>
@@ -151,6 +158,23 @@
           sortDataCallback(it.value);
         });
       });
+
+      // navigation
+      // The google web app prevents us from using the standard anchor/href approach
+      const topDiv = document.getElementById("my-top-div");
+      const bottomDiv = document.getElementById("my-bottom-div");
+      document
+        .getElementById("my-up-chevron")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          topDiv.scrollIntoView();
+        });
+      document
+        .getElementById("my-down-chevron")
+        .addEventListener("click", (e) => {
+          e.preventDefault();
+          bottomDiv.scrollIntoView();
+        });
     </script>
   </body>
 </html>
