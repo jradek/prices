@@ -27,6 +27,7 @@ SELECT
   i.serving_size,
   i.unit,
   i.category,
+  i.usual_package_size,
   overall.min_price_per_serving,
   overall.avg_price_per_serving,
   overall.max_price_per_serving,
@@ -41,11 +42,11 @@ LEFT JOIN (
     ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100, 2)  AS "avg_price_per_serving",
     MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
     COUNT(*) AS "num_measures"
-  FROM 
+  FROM
 	discount d
-  INNER JOIN 
+  INNER JOIN
     item i ON i.id = d.item_id
-  GROUP BY 
+  GROUP BY
     d.item_id
   ) AS overall ON overall.id = i.id
 ORDER BY
@@ -75,8 +76,8 @@ SELECT
 FROM
   item i,
   (
-    SELECT DISTINCT 
-      store 
+    SELECT DISTINCT
+      store
     FROM
       discount
   ) AS all_stores
@@ -88,7 +89,7 @@ LEFT JOIN (
     i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as min_price_per_serving,
     d.start as min_date,
     count(*) as num_measures
-  FROM 
+  FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
@@ -101,7 +102,7 @@ LEFT JOIN (
     d.store,
     ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0)) / 100.0 AS avg_price_per_serving,
     count(*) AS num_measures
-  FROM 
+  FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
@@ -114,7 +115,7 @@ LEFT JOIN (
     i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as max_price_per_serving,
     d.start as max_date,
     count(*) as num_measures
-  FROM 
+  FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
@@ -137,7 +138,7 @@ LEFT JOIN (
 WHERE
 	(min_price.store IS not NULL) OR (regular.store is not null)
 ORDER BY
-  i.name, 
+  i.name,
   all_stores.store
 """
     df = pd.read_sql(STORE_QUERY, con)
