@@ -2,7 +2,7 @@
 .mypy_cache/
 __pycache__/
 
-new_discounts.sql
+new_data.sql
 page/current_offers_data.js
 page/prices_data.js
 tmp/

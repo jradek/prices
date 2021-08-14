@@ -32,6 +32,15 @@ class Discount:
     price_cent: int
 
 
+@dataclass
+class Regular:
+    date: str
+    store: str
+    item_id: int
+    amount: int
+    price_cent: int
+
+
 def get_items() -> Mapping[int, Item]:
     query = """
 SELECT i.id, i.name, i.serving_size, i.unit
@@ -73,6 +82,17 @@ def get_last_discount_id() -> int:
     query = """
 SELECT MAX(d.id)
 FROM discount d
+    """
+    with sqlite3.connect("tmp/prices.db") as con:
+        cursor = con.cursor()
+        row = cursor.execute(query).fetchone()
+        return row[0]
+
+
+def get_last_regular_id() -> int:
+    query = """
+SELECT MAX(r.id)
+FROM regular r
     """
     with sqlite3.connect("tmp/prices.db") as con:
         cursor = con.cursor()
@@ -135,6 +155,7 @@ SATURDAY: str
 LAST_START: str
 LAST_END: str
 DISCOUNTS: List[Discount] = []
+REGULARS: List[Regular] = []
 CONSOLE: rich.console.Console = None
 
 
@@ -173,7 +194,7 @@ def i_show_current_values():
     CONSOLE.print(s)
 
 
-def i_format_discount(d: Discount, con=CONSOLE) -> str:
+def i_discount_format(d: Discount, con=CONSOLE) -> str:
     global ITEMS, STORES
     store_opt_start = ""
     store_opt_end = ""
@@ -183,6 +204,19 @@ def i_format_discount(d: Discount, con=CONSOLE) -> str:
     item = ITEMS[d.item_id]
     price_euro = d.price_cent * 1.0 / 100.0
     s = f"""{format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
+    return s
+
+
+def i_regular_format(r: Regular, con=CONSOLE) -> str:
+    global ITEMS, STORES
+    store_opt_start = ""
+    store_opt_end = ""
+    if r.store not in STORES:
+        store_opt_start = "[bold red]"
+        store_opt_end = "[/bold red]"
+    item = ITEMS[r.item_id]
+    price_euro = r.price_cent * 1.0 / 100.0
+    s = f"""{format_date(r.date)}: {store_opt_start}{r.store}{store_opt_end}, {item.name}, {r.amount}{item.unit}, {price_euro:.2f}€"""
     return s
 
 
@@ -222,7 +256,7 @@ def i_fz_search(name: str, **kwargs):
     i_show_current_values()
 
 
-def i_add_discount(
+def i_discount_add(
     amount: int,
     price_cent: int,
     store: Optional[str] = None,
@@ -297,13 +331,74 @@ def i_add_discount(
     discount = Discount(
         LAST_START, LAST_END, LAST_STORE, item.item_id, amount, price_cent
     )
-    CONSOLE.print(i_format_discount(discount))
+    CONSOLE.print(i_discount_format(discount))
 
     res = input("Is this correct [yN]? ")
     if res.lower() == "y":
         DISCOUNTS.append(discount)
         l = len(DISCOUNTS)
         CONSOLE.print(f"... discount added ({l} on list)", style="green")
+
+    i_show_current_values()
+
+
+def i_regular_add(
+    amount: int,
+    price_cent: int,
+    store: Optional[str] = None,
+    item_id: Optional[int] = None,
+    date: Optional[str] = None,
+):
+    """Add new regular
+
+    amount : int
+        amount expressed in item unit
+    price_cent : int
+        price in cent
+    item_id : int, optional
+        item identifier, or last best match of 'i_fz_search'
+    store : str, optional
+        store to use, or last used one
+    date : str, optional
+        date of regular price, or last monday. Format yyyy-mm-dd
+    """
+
+    global MONDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, REGULARS, CONSOLE, LAST_START, LAST_END
+
+    # start date handling
+    start_date_str, start_date = parse_date(MONDAY)
+    if date is not None:
+        start_date_str, start_date = parse_date(date)
+    elif LAST_START is not None:
+        start_date_str, start_date = parse_date(LAST_START)
+
+    LAST_START = start_date_str
+
+    # item handling
+    item = None
+    if item_id is not None:
+        item = ITEMS[item_id]
+    elif LAST_BEST_MATCH_ITEM_ID >= 0:
+        item = ITEMS[LAST_BEST_MATCH_ITEM_ID]
+    else:
+        raise ValueError("No item_id given")
+
+    # store handling
+    if store is not None:
+        LAST_STORE = store
+
+    if LAST_STORE is None:
+        raise ValueError("No store given")
+
+    regular = Regular(LAST_START, LAST_STORE, item.item_id, amount, price_cent)
+
+    CONSOLE.print(i_regular_format(regular))
+
+    res = input("Is this correct [yN]? ")
+    if res.lower() == "y":
+        REGULARS.append(regular)
+        l = len(REGULARS)
+        CONSOLE.print(f"... regular added ({l} on list)", style="green")
 
     i_show_current_values()
 
@@ -322,13 +417,19 @@ def i_alpha_items(start: Optional[str] = None):
         CONSOLE.print(f"{idx:03d}. {item}")
 
 
-def i_show_discounts():
+def i_discount_show():
     global CONSOLE, DISCOUNTS
     for idx, d in enumerate(DISCOUNTS):
-        CONSOLE.print(f"{idx:02d}: {i_format_discount(d)}")
+        CONSOLE.print(f"{idx:02d}: {i_discount_format(d)}")
 
 
-def i_delete_discount(idx: Optional[int] = None):
+def i_regular_show():
+    global CONSOLE, REGULARS
+    for idx, d in enumerate(REGULARS):
+        CONSOLE.print(f"{idx:02d}: {i_regular_format(d)}")
+
+
+def i_discount_delete(idx: Optional[int] = None):
     """Delete discount from list
 
     idx : int, optional
@@ -336,12 +437,13 @@ def i_delete_discount(idx: Optional[int] = None):
     """
 
     global CONSOLE, DISCOUNTS
-    if idx is None and len(DISCOUNTS) > 0:
-        last_item = DISCOUNTS[-1]
-        CONSOLE.print(f"{i_format_discount(last_item)}")
-        res = input("Delete this item [yN]? ")
-        if res.lower() == "y":
-            del DISCOUNTS[-1]
+    if idx is None:
+        if len(DISCOUNTS) > 0:
+            last_item = DISCOUNTS[-1]
+            CONSOLE.print(f"{i_discount_format(last_item)}")
+            res = input("Delete this item [yN]? ")
+            if res.lower() == "y":
+                del DISCOUNTS[-1]
 
         return
 
@@ -351,25 +453,57 @@ def i_delete_discount(idx: Optional[int] = None):
         CONSOLE.print(f"Failed to remove index {idx}", style="red")
 
 
+def i_regular_delete(idx: Optional[int] = None):
+    """Delete regular from list
+
+    idx : int, optional
+        delete regular at this position, or the last one
+    """
+
+    global CONSOLE, REGULARS
+    if idx is None:
+        if len(REGULARS) > 0:
+            last_item = REGULARS[-1]
+            CONSOLE.print(f"{i_regular_format(last_item)}")
+            res = input("Delete this item [yN]? ")
+            if res.lower() == "y":
+                del REGULARS[-1]
+
+        return
+
+    try:
+        REGULARS.pop(idx)
+    except Exception as e:
+        CONSOLE.print(f"Failed to remove index {idx}", style="red")
+
+
 def i_dump_sql() -> None:
-    """Dump discount list to file 'new_discounts.sql'
+    """Dump discount list to file 'new_data.sql'
 
     The file contains the appropriate SQL INSERT statements
     """
 
-    global DISCOUNTS, CONSOLE
+    global DISCOUNTS, REGULARS, CONSOLE
     last_id = get_last_discount_id()
 
-    lines = []
+    lines = ["", "", " -- begin dump"]
     for idx, entry in enumerate(DISCOUNTS):
         line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{entry.start}','{entry.end}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
         lines.append(line)
 
+    lines.extend(["", "-- regulars", ""])
+
+    last_id = get_last_regular_id()
+    for idx, entry in enumerate(REGULARS):
+        line = f"INSERT INTO regular VALUES({last_id + 1 + idx},'{entry.date}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
+        lines.append(line)
+
+    lines.extend(["", "-- end dump", "", ""])
+
     content = "\n".join(lines)
 
-    fn = "new_discounts.sql"
+    fn = "new_data.sql"
     with open(fn, "a") as fp:
-        fp.write("\n\n\n")
         fp.write(content)
         CONSOLE.print(f"Wrote {fn}", style="green")
 
@@ -377,21 +511,26 @@ def i_dump_sql() -> None:
 def i_create_demo():
     global MONDAY, SATURDAY, LAST_BEST_MATCH_ITEM_ID, LAST_STORE, DISCOUNTS, CONSOLE
 
-    if len(DISCOUNTS) > 0:
-        res = input("Discounts not empty. Overwrite with demo data [yN]?")
+    if len(DISCOUNTS) > 0 or len(REGULARS) > 0:
+        res = input("Discounts or Regulars not empty. Overwrite with demo data [yN]?")
         if res.lower() != "y":
             return
 
     DISCOUNTS.clear()
 
-    DISCOUNTS.append(Discount(MONDAY, SATURDAY, "lidl", 12, 10, 159))
+    DISCOUNTS.append(Discount(MONDAY, SATURDAY, "lidl", 12, 10, 129))
     DISCOUNTS.append(Discount("2021-08-06", SATURDAY, "kaufland", 53, 500, 199))
+
+    REGULARS.clear()
+    REGULARS.append(Regular(MONDAY, "rewe", 12, 10, 159))
+    REGULARS.append(Regular(SATURDAY, "kaufland", 53, 500, 219))
 
     LAST_STORE = "kaufland"
     LAST_BEST_MATCH_ITEM_ID = 53
     MONDAY, SATURDAY = "2021-08-02", "2021-08-07"
 
-    i_show_discounts()
+    i_discount_show()
+    i_regular_show()
     CONSOLE.print(f"{LAST_STORE=}")
     CONSOLE.print(f"{LAST_BEST_MATCH_ITEM_ID=}")
     CONSOLE.print(f"{MONDAY=}")
