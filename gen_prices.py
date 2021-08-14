@@ -114,13 +114,13 @@ LEFT JOIN (
     i.name,
     d.store,
     i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as max_price_per_serving,
-    d.start as max_date,
+    d.end as max_date,
     count(*) as num_measures
   FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
-  HAVING MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0
+  HAVING MAX(i.serving_size * d.price_cent / d.amount * 1.0 / 100.0)
 ) AS max_price ON max_price.item_id = i.id AND max_price.store = all_stores.store
 LEFT JOIN (
   SELECT
