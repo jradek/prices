@@ -8,7 +8,7 @@ import rich.console
 
 from dataclasses import dataclass
 from fuzzywuzzy import fuzz
-from typing import List, Mapping, Optional, Set, Tuple
+from typing import Any, List, Mapping, Optional, Set, Tuple
 
 
 @dataclass
@@ -46,7 +46,7 @@ FROM item i
     return items
 
 
-def alpha_items(items: List[Item], start: str = None) -> List[Item]:
+def alpha_items(items: Mapping[int, Item], start: str = None) -> List[Item]:
     def check(s: str):
         if isinstance(start, str):
             return s.lower().startswith(start.lower())
@@ -126,16 +126,16 @@ def parse_date(s: str) -> Tuple[str, datetime.datetime]:
 # =====================================================================
 
 
-ITEMS = {}
-STORES = set()
-LAST_BEST_MATCH_ITEM_ID = -1
-LAST_STORE = None
-MONDAY = None
-SATURDAY = None
-LAST_START = None
-LAST_END = None
+ITEMS: Mapping[int, Item] = {}
+STORES: Set[str] = set()
+LAST_BEST_MATCH_ITEM_ID: int = -1
+LAST_STORE: Optional[str] = None
+MONDAY: str
+SATURDAY: str
+LAST_START: str
+LAST_END: str
 DISCOUNTS: List[Discount] = []
-CONSOLE = None
+CONSOLE: rich.console.Console = None
 
 
 def i_show_current_values():
@@ -351,7 +351,7 @@ def i_delete_discount(idx: Optional[int] = None):
         CONSOLE.print(f"Failed to remove index {idx}", style="red")
 
 
-def i_dump_sql() -> str:
+def i_dump_sql() -> None:
     """Dump discount list to file 'new_discounts.sql'
 
     The file contains the appropriate SQL INSERT statements
@@ -365,12 +365,12 @@ def i_dump_sql() -> str:
         line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{entry.start}','{entry.end}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
         lines.append(line)
 
-    lines = "\n".join(lines)
+    content = "\n".join(lines)
 
     fn = "new_discounts.sql"
     with open(fn, "a") as fp:
         fp.write("\n\n\n")
-        fp.write(lines)
+        fp.write(content)
         CONSOLE.print(f"Wrote {fn}", style="green")
 
 

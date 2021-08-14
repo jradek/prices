@@ -111,13 +111,13 @@ LEFT JOIN (
     i.name,
     r.store,
     ROUND(r.price_cent * i.serving_size * 1.0 / r.amount / 100.0, 2) AS "per_serving"
-  FROM 
+  FROM
     item i
   JOIN (
-    SELECT 
-      item_id, 
-      store, 
-      price_cent, 
+    SELECT
+      item_id,
+      store,
+      price_cent,
       amount
     FROM regular
     GROUP BY item_id, store
