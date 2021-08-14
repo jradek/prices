@@ -203,7 +203,7 @@ def i_discount_format(d: Discount, con=CONSOLE) -> str:
         store_opt_end = "[/bold red]"
     item = ITEMS[d.item_id]
     price_euro = d.price_cent * 1.0 / 100.0
-    s = f"""{format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
+    s = f"""Discount {format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
     return s
 
 
@@ -216,7 +216,7 @@ def i_regular_format(r: Regular, con=CONSOLE) -> str:
         store_opt_end = "[/bold red]"
     item = ITEMS[r.item_id]
     price_euro = r.price_cent * 1.0 / 100.0
-    s = f"""{format_date(r.date)}: {store_opt_start}{r.store}{store_opt_end}, {item.name}, {r.amount}{item.unit}, {price_euro:.2f}€"""
+    s = f"""Regular {format_date(r.date)}: {store_opt_start}{r.store}{store_opt_end}, {item.name}, {r.amount}{item.unit}, {price_euro:.2f}€"""
     return s
 
 
@@ -259,6 +259,7 @@ def i_fz_search(name: str, **kwargs):
 def i_discount_add(
     amount: int,
     price_cent: int,
+    regular: Optional[int] = None,
     store: Optional[str] = None,
     item_id: Optional[int] = None,
     start: Optional[str] = None,
@@ -270,6 +271,8 @@ def i_discount_add(
         amount expressed in item unit
     price_cent : int
         price in cent
+    regular: int, optional
+        regular price in cent
     item_id : int, optional
         item identifier, or last best match of 'i_fz_search'
     store : str, optional
@@ -280,7 +283,7 @@ def i_discount_add(
         end deal date, or next saturday. Format yyyy-mm-dd or '+dd' as offset to start date
     """
 
-    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE, LAST_START, LAST_END
+    global MONDAY, SATURDAY, ITEMS, LAST_STORE, STORES, DISCOUNTS, CONSOLE, LAST_START, LAST_END, REGULARS
 
     # start date handling
     start_date_str, start_date = parse_date(MONDAY)
@@ -331,13 +334,23 @@ def i_discount_add(
     discount = Discount(
         LAST_START, LAST_END, LAST_STORE, item.item_id, amount, price_cent
     )
+
     CONSOLE.print(i_discount_format(discount))
+
+    regular_item = None
+    if regular is not None:
+        regular_item = Regular(LAST_START, LAST_STORE, item.item_id, amount, regular)
+        CONSOLE.print(i_regular_format(regular_item))
 
     res = input("Is this correct [yN]? ")
     if res.lower() == "y":
         DISCOUNTS.append(discount)
         l = len(DISCOUNTS)
         CONSOLE.print(f"... discount added ({l} on list)", style="green")
+        if regular_item is not None:
+            REGULARS.append(regular_item)
+            l = len(REGULARS)
+            CONSOLE.print(f"... regular added ({l} on list)", style="green")
 
     i_show_current_values()
 
@@ -487,15 +500,15 @@ def i_dump_sql() -> None:
     last_id = get_last_discount_id()
 
     lines = ["", "", " -- begin dump"]
-    for idx, entry in enumerate(DISCOUNTS):
-        line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{entry.start}','{entry.end}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
+    for idx, disc in enumerate(DISCOUNTS):
+        line = f"INSERT INTO discount VALUES({last_id + 1 + idx},'{disc.start}','{disc.end}','{disc.store}',{disc.item_id},{disc.amount},{disc.price_cent});"
         lines.append(line)
 
     lines.extend(["", "-- regulars", ""])
 
     last_id = get_last_regular_id()
-    for idx, entry in enumerate(REGULARS):
-        line = f"INSERT INTO regular VALUES({last_id + 1 + idx},'{entry.date}','{entry.store}',{entry.item_id},{entry.amount},{entry.price_cent});"
+    for idx, reg in enumerate(REGULARS):
+        line = f"INSERT INTO regular VALUES({last_id + 1 + idx},'{reg.date}','{reg.store}',{reg.item_id},{reg.amount},{reg.price_cent});"
         lines.append(line)
 
     lines.extend(["", "-- end dump", "", ""])
