@@ -25,9 +25,9 @@ WITH overall AS (
  SELECT
     i.id,
     i.name,
-    MIN(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "min_price_per_serving",
-    ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0) / 100, 2)  AS "avg_price_per_serving",
-    MAX(i.serving_size * d.price_cent / d.amount * 1.0) / 100.0 AS "max_price_per_serving",
+    ROUND(MIN(i.serving_size * d.price_cent * 1.0 / d.amount) / 100, 2) AS "min_price_per_serving",
+    ROUND(AVG(i.serving_size * d.price_cent * 1.0 / d.amount) / 100, 2) AS "avg_price_per_serving",
+    ROUND(MAX(i.serving_size * d.price_cent * 1.0 / d.amount) / 100, 2) AS "max_price_per_serving",
     COUNT(*) AS "num_measures"
   FROM
 	discount d
@@ -87,21 +87,22 @@ LEFT JOIN (
     i.id as item_id,
     i.name,
     d.store,
-    i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as min_price_per_serving,
+    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) as min_price_per_serving,
     d.start as min_date,
     count(*) as num_measures
   FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
-  HAVING MIN(i.serving_size * d.price_cent / d.amount * 1.0)
+  HAVING 
+    MIN(i.serving_size * d.price_cent * 1.0 / d.amount / 100)
 ) AS min_price ON min_price.item_id = i.id AND min_price.store = all_stores.store
 LEFT JOIN (
   SELECT
     i.id as item_id,
     i.name,
     d.store,
-    ROUND(AVG(i.serving_size * d.price_cent / d.amount * 1.0)) / 100.0 AS avg_price_per_serving,
+    ROUND(AVG(i.serving_size * d.price_cent * 1.0 / d.amount) / 100, 2) AS avg_price_per_serving,
     count(*) AS num_measures
   FROM
     discount d
@@ -113,21 +114,21 @@ LEFT JOIN (
     i.id as item_id,
     i.name,
     d.store,
-    i.serving_size * d.price_cent / d.amount * 1.0 / 100.0 as max_price_per_serving,
+    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) as max_price_per_serving,
     d.end as max_date,
     count(*) as num_measures
   FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
   GROUP BY d.item_id, d.store
-  HAVING MAX(i.serving_size * d.price_cent / d.amount * 1.0 / 100.0)
+  HAVING MAX(i.serving_size * d.price_cent * 1.0 / d.amount / 100)
 ) AS max_price ON max_price.item_id = i.id AND max_price.store = all_stores.store
 LEFT JOIN (
   SELECT
     r.item_id,
     r.store,
     r.date AS regular_date,
-    i.serving_size * r.price_cent / r.amount * 1.0 / 100.0 as regular_price_per_serving
+    ROUND(i.serving_size * r.price_cent * 1.0 / r.amount / 100, 2) as regular_price_per_serving
   FROM
     regular r
   INNER JOIN item i ON i.id = r.item_id

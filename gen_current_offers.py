@@ -84,7 +84,7 @@ FROM (SELECT
     i.unit,
     i.serving_size,
     i.category,
-    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) AS "price_per_serving"
+    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) AS "price_per_serving"
   FROM discount d
   INNER JOIN item i ON i.id = item_id
 ) AS calc
@@ -92,11 +92,11 @@ JOIN (SELECT
     i.id ,
     d.store AS "min_store",
     d."start" AS "min_start",
-    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2) AS "min_price_per_serving"
+    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) AS "min_price_per_serving"
   FROM discount d
   JOIN item i on i.id = d.item_id
   GROUP BY i.id
-  HAVING MIN(round(i.serving_size * d.price_cent * 1.0 / d.amount / 100.0, 2))
+  HAVING MIN(ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2))
 ) AS min_price
 JOIN (SELECT
     i.id,
@@ -110,7 +110,7 @@ LEFT JOIN (
     i.id as "item_id",
     i.name,
     r.store,
-    ROUND(r.price_cent * i.serving_size * 1.0 / r.amount / 100.0, 2) AS "per_serving"
+    ROUND(r.price_cent * i.serving_size * 1.0 / r.amount / 100, 2) AS "per_serving"
   FROM
     item i
   JOIN (
