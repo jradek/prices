@@ -59,76 +59,30 @@ ORDER BY
 
 def get_prices_per_store(con: sqlite3.Connection) -> pd.DataFrame:
     STORE_QUERY = """
-SELECT
-  i.id AS item_id,
-  --i.name,
-  --i.serving_size,
-  --i.unit,
-  --i.category,
-  all_stores.store,
-  min_price.min_price_per_serving,
-  min_price.min_date,
-  avg_price.avg_price_per_serving,
-  max_price.max_price_per_serving,
-  max_price.max_date,
-  max_price.num_measures,
-  regular.regular_price_per_serving,
-  regular.regular_date
-FROM
-  item i,
-  (
-    SELECT DISTINCT
-      store
-    FROM
-      discount
-  ) AS all_stores
-LEFT JOIN (
+WITH price_per_serving_euro AS (
   SELECT
     i.id as item_id,
     i.name,
     d.store,
-    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) as min_price_per_serving,
-    d.start as min_date,
-    count(*) as num_measures
+    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) as price_per_serving_euro,
+    d.start,
+    d.end
   FROM
     discount d
   INNER JOIN item i ON i.id = d.item_id
-  GROUP BY d.item_id, d.store
-  HAVING 
-    MIN(i.serving_size * d.price_cent * 1.0 / d.amount / 100)
-) AS min_price ON min_price.item_id = i.id AND min_price.store = all_stores.store
-LEFT JOIN (
-  SELECT
-    i.id as item_id,
-    i.name,
-    d.store,
-    ROUND(AVG(i.serving_size * d.price_cent * 1.0 / d.amount) / 100, 2) AS avg_price_per_serving,
-    count(*) AS num_measures
+),
+all_stores AS (
+  SELECT DISTINCT
+    store
   FROM
-    discount d
-  INNER JOIN item i ON i.id = d.item_id
-  GROUP BY d.item_id, d.store
-) AS avg_price ON avg_price.item_id = i.id AND avg_price.store = all_stores.store
-LEFT JOIN (
-  SELECT
-    i.id as item_id,
-    i.name,
-    d.store,
-    ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) as max_price_per_serving,
-    d.end as max_date,
-    count(*) as num_measures
-  FROM
-    discount d
-  INNER JOIN item i ON i.id = d.item_id
-  GROUP BY d.item_id, d.store
-  HAVING MAX(i.serving_size * d.price_cent * 1.0 / d.amount / 100)
-) AS max_price ON max_price.item_id = i.id AND max_price.store = all_stores.store
-LEFT JOIN (
+    discount
+),
+latest_regular_price_per_serving_euro AS (
   SELECT
     r.item_id,
     r.store,
-    r.date AS regular_date,
-    ROUND(i.serving_size * r.price_cent * 1.0 / r.amount / 100, 2) as regular_price_per_serving
+    r.date,
+    ROUND(i.serving_size * r.price_cent * 1.0 / r.amount / 100, 2) as price_per_serving_euro
   FROM
     regular r
   INNER JOIN item i ON i.id = r.item_id
@@ -136,9 +90,68 @@ LEFT JOIN (
     r.item_id,
     r.store
   HAVING MAX(r.date)
+)
+SELECT
+  i.id AS item_id,
+  -- i.name,
+  --i.serving_size,
+  --i.unit,
+  --i.category,
+  all_stores.store,
+  min_price.price_per_serving_euro AS min_price_per_serving_euro,
+  min_price.start AS min_date,
+  avg_price.price_per_serving_euro AS avg_price_per_serving_euro,
+  max_price.price_per_serving_euro AS max_price_per_serving_euro,
+  max_price.end AS max_date,
+  max_price.num_measures,
+  regular.price_per_serving_euro AS regular_price_per_serving_euro,
+  regular.date AS regular_date
+FROM item i, all_stores
+LEFT JOIN (
+  SELECT
+    t.item_id,
+    t.store,
+    t.price_per_serving_euro,
+    t.start
+  FROM
+    price_per_serving_euro t
+  GROUP BY t.item_id, t.store
+  HAVING
+     MIN(t.price_per_serving_euro)
+) AS min_price ON min_price.item_id = i.id AND min_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    t.item_id,
+    t.store,
+    ROUND(AVG(t.price_per_serving_euro), 2) AS price_per_serving_euro
+  FROM
+    price_per_serving_euro t
+  GROUP BY t.item_id, t.store
+) AS avg_price ON avg_price.item_id = i.id AND avg_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    t.item_id,
+    t.store,
+    t.price_per_serving_euro,
+    t.end,
+    count(*) AS num_measures
+  FROM
+    price_per_serving_euro t
+  GROUP BY t.item_id, t.store
+  HAVING
+     MAX(t.price_per_serving_euro)
+) AS max_price ON max_price.item_id = i.id AND max_price.store = all_stores.store
+LEFT JOIN (
+  SELECT
+    r.item_id,
+    r.store,
+    r.date,
+    r.price_per_serving_euro
+  FROM
+    latest_regular_price_per_serving_euro r
 ) AS regular ON regular.item_id = i.id AND regular.store = all_stores.store
 WHERE
-	(min_price.store IS not NULL) OR (regular.store is not null)
+  (min_price.store IS NOT NULL) OR (regular.store IS NOT NULL)
 ORDER BY
   i.name,
   all_stores.store
