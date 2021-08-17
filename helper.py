@@ -2,12 +2,12 @@
 
 import datetime
 import itertools
+import re
 import sqlite3
 
 import rich.console
 
 from dataclasses import dataclass
-from fuzzywuzzy import fuzz
 from typing import Any, List, Mapping, Optional, Set, Tuple
 
 
@@ -100,21 +100,66 @@ FROM regular r
         return row[0]
 
 
-def fz_search(
-    items: Mapping[int, Item], name: str, max_results=5, ignore_case=False
-) -> List[Item]:
-    def transform(s: str) -> str:
-        if ignore_case:
-            return s.lower()
-        return s
+def fuzzyfinder(input: str, collection, accessor=lambda x: x, sort_results=True):
+    """
+    Arguments
+    ---------
 
-    res = (
-        (fuzz.ratio(transform(name), transform(item.name)), item)
-        for _, item in items.items()
+    input : str
+        A partial string which is typically entered by a user.
+    collection : iterable:
+        A collection of strings which will be filtered based on the `input`.
+    accessor : function
+        If the `collection` is not an iterable of strings, then use the accessor to fetch the string that
+        will be used for fuzzy matching.
+    sort_results : bool
+        The suggestions are sorted by considering the smallest contiguous match, followed by where the
+        match is found in the full string. If two suggestions have the same rank, they are then sorted
+        alpha-numerically. This parameter controls the *last tie-breaker-alpha-numeric sorting*. The sorting
+        based on match length and position will be intact.
+
+
+    Returns
+    -------
+    suggestions: generator
+        A generator object that produces a list of suggestions narrowed down from `collection` using the `input`.
+
+    Note
+    ----
+    tribute to https://github.com/amjith/fuzzyfinder
+    """
+
+    suggestions = []
+    pat = ".*?".join(map(re.escape, input))
+    pat = "(?=({0}))".format(pat)  # lookahead regex to manage overlapping matches
+    regex = re.compile(pat, re.IGNORECASE)
+    for item in collection:
+        r = list(regex.finditer(accessor(item)))
+        if r:
+            best = min(r, key=lambda x: len(x.group(1)))  # find shortest match
+            suggestions.append((len(best.group(1)), best.start(), accessor(item), item))
+
+    if sort_results:
+        return (z[-1] for z in sorted(suggestions))
+    else:
+        return (z[-1] for z in sorted(suggestions, key=lambda x: x[:2]))
+
+
+def fuzzyfinder_wrapper(
+    items: Mapping[int, Item], input: str, max_results=5, **kwargs
+) -> List[Item]:
+    """
+    Adapt fuzzyfinder for the item structure
+    """
+
+    def accessor(i: Item) -> str:
+        return f"{i.name} {i.unit}"
+
+    return list(
+        itertools.islice(
+            fuzzyfinder(input, items.values(), accessor, **kwargs), max_results
+        )
     )
-    res = sorted(res, key=lambda t: t[0], reverse=True)
-    res = [item for score, item in itertools.islice(res, max_results) if score > 0]
-    return res
 
 
 def get_monday_saturday() -> Tuple[str, str]:
@@ -245,7 +290,7 @@ def i_fz_search(name: str, **kwargs):
     """
 
     global ITEMS, LAST_BEST_MATCH_ITEM_ID
-    results = fz_search(ITEMS, name, **kwargs)
+    results = fuzzyfinder_wrapper(ITEMS, name, **kwargs)
     for idx, item in enumerate(results):
         if idx == 0:
             LAST_BEST_MATCH_ITEM_ID = item.item_id
@@ -552,8 +597,9 @@ def i_create_demo():
 
 def main():
     items = get_items()
-    res = fz_search(items, "jack daniels", ignore_case=False)
+    res = fuzzyfinder_wrapper(items, "Sack")
     print(list(res))
+
     print(get_monday_saturday())
     print(format_date("2021-08-01"))
     print(get_stores())
