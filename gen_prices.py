@@ -153,7 +153,7 @@ LEFT JOIN (
 WHERE
   (min_price.store IS NOT NULL) OR (regular.store IS NOT NULL)
 ORDER BY
-  i.name,
+  i.id,
   all_stores.store
 """
     df = pd.read_sql(STORE_QUERY, con)
