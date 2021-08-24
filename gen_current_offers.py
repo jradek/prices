@@ -121,7 +121,7 @@ LEFT JOIN (
       amount
     FROM regular
     GROUP BY item_id, store
-    HAVING `date` <= "{date}"
+    HAVING MAX(date)
     ) AS r ON i.id = r.item_id
 ) AS regular ON (regular.item_id = calc.item_id) AND (regular.store = calc.store)
 WHERE "{date}" <= calc."end"
