@@ -2857,6 +2857,9 @@ INSERT INTO discount VALUES(2840,'2021-09-23','2021-09-29','kaufland',45,100,59)
 INSERT INTO discount VALUES(2841,'2021-09-27','2021-09-29','kaufland',78,750,199);
 INSERT INTO discount VALUES(2842,'2021-09-27','2021-10-02','aldi',47,750,269);
 INSERT INTO discount VALUES(2843,'2021-10-01','2021-10-02','aldi',24,1500,699);
+INSERT INTO discount VALUES(2844,'2021-09-21','2021-09-25','lidl',56,200,159);
+INSERT INTO discount VALUES(2845,'2021-09-21','2021-09-25','lidl',76,200,249);
+INSERT INTO discount VALUES(2846,'2021-09-21','2021-09-25','lidl',33,200,299);
 
 CREATE TABLE item (
 	id INTEGER NOT NULL,
@@ -2900,7 +2903,7 @@ INSERT INTO item VALUES(29,'Jim Beam Kentucky Straight Bourbon Whiskey',1000,'ml
 INSERT INTO item VALUES(30,'Joghurt 1.5%',100,'g','dairy',500);
 INSERT INTO item VALUES(31,'Joghurt 3.5%',100,'g','dairy',500);
 INSERT INTO item VALUES(32,'Kerrygold',100,'g','dairy',250);
-INSERT INTO item VALUES(33,'UNUSED 4',100,'g','dairy',500);
+INSERT INTO item VALUES(33,'Pecannusskerne',100,'g','nut',100);
 INSERT INTO item VALUES(34,'Mandeln',100,'g','nut',200);
 INSERT INTO item VALUES(35,'Martini',1000,'ml','liquor',750);
 INSERT INTO item VALUES(36,'Nordgold Eierlikoer 14%',1000,'ml','liquor',700);
@@ -2923,7 +2926,7 @@ INSERT INTO item VALUES(52,'Schweinehackfleisch',100,'g','meat',500);
 INSERT INTO item VALUES(53,'Schweineleber',100,'g','meat',500);
 INSERT INTO item VALUES(54,'Schweineschnitzel',100,'g','meat',400);
 INSERT INTO item VALUES(55,'Magerquark 0.1%',100,'g','dairy',500);
-INSERT INTO item VALUES(56,'UNUSED 3',100,'g','dairy',500);
+INSERT INTO item VALUES(56,'Walnusskerne',100,'g','nut',200);
 INSERT INTO item VALUES(57,'Tanqueray London Dry Gin',1000,'ml','gin',700);
 INSERT INTO item VALUES(58,'Aubergine',1,'Stueck','vegetable',1);
 INSERT INTO item VALUES(59,'Three Sixty Vodka',1000,'ml','vodka',700);
@@ -2943,7 +2946,7 @@ INSERT INTO item VALUES(72,'Grand Sud Wein',1000,'ml','wine',1000);
 INSERT INTO item VALUES(73,'Hendricks Gin',1000,'ml','gin',700);
 INSERT INTO item VALUES(74,'Coca Cola',1000,'ml','soft drink',1000);
 INSERT INTO item VALUES(75,'Eisbergsalat',1,'Stueck','vegetable',1);
-INSERT INTO item VALUES(76,'UNUSED 5',100,'g','vegetable',200);
+INSERT INTO item VALUES(76,'Paranusskerne',100,'g','nut',200);
 INSERT INTO item VALUES(77,'Aperol Aperitivo',1000,'ml','liquor',700);
 INSERT INTO item VALUES(78,'Blanchet',1000,'ml','wine',750);
 INSERT INTO item VALUES(79,'Southern Comfort',1000,'ml','liquor',700);
@@ -3220,4 +3223,7 @@ INSERT INTO regular VALUES(233,'2021-09-23','kaufland',45,100,119);
 INSERT INTO regular VALUES(234,'2021-09-27','kaufland',78,750,279);
 INSERT INTO regular VALUES(235,'2021-09-27','aldi',47,750,399);
 INSERT INTO regular VALUES(236,'2021-09-21','penny',61,500,499);
+INSERT INTO regular VALUES(237,'2021-09-21','lidl',56,200,199);
+INSERT INTO regular VALUES(238,'2021-09-21','lidl',76,200,329);
+INSERT INTO regular VALUES(239,'2021-09-21','lidl',33,200,399);
 COMMIT;
