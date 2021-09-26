@@ -186,6 +186,19 @@ def parse_date(s: str) -> Tuple[str, datetime.datetime]:
     return s, d
 
 
+def roundup_next_5_or_9(val: int) -> int:
+    rem = val % 10
+    if rem <= 5:
+        return val + (5 - rem)
+    return val + (9 - rem)
+
+
+def price_from_discount_percent(price: int, discount_percent: int) -> int:
+    normal = int((price * 100.0) / (100.0 - discount_percent))
+    # price normally end in '5' or '9'
+    return roundup_next_5_or_9(normal)
+
+
 # =====================================================================
 # INTERACTIVE
 # =====================================================================
@@ -318,6 +331,7 @@ def i_discount_add(
         price in cent
     regular: int, optional
         regular price in cent
+        if regular is negative, it is interpreted as discount in percent, e.g. "32% drop"
     item_id : int, optional
         item identifier, or last best match of 'i_fz_search'
     store : str, optional
@@ -384,7 +398,16 @@ def i_discount_add(
 
     regular_item = None
     if regular is not None:
-        regular_item = Regular(LAST_START, LAST_STORE, item.item_id, amount, regular)
+        regular_price = regular
+        if regular < 0:
+            if regular <= -100:
+                raise ValueError(f"Invalid regular percentage {-regular}%")
+            # regular is expressed as discount in percent
+            regular_price = price_from_discount_percent(price_cent, -regular)
+
+        regular_item = Regular(
+            LAST_START, LAST_STORE, item.item_id, amount, regular_price
+        )
         CONSOLE.print(i_regular_format(regular_item))
 
     res = input("Is this correct [yN]? ")
