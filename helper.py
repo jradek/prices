@@ -2,6 +2,7 @@
 
 import datetime
 import itertools
+import math
 import re
 import sqlite3
 
@@ -252,7 +253,7 @@ def i_show_current_values():
     CONSOLE.print(s)
 
 
-def i_discount_format(d: Discount, con=CONSOLE) -> str:
+def i_discount_format(d: Discount, r: Regular = None, con=CONSOLE) -> str:
     global ITEMS, STORES
     store_opt_start = ""
     store_opt_end = ""
@@ -262,6 +263,10 @@ def i_discount_format(d: Discount, con=CONSOLE) -> str:
     item = ITEMS[d.item_id]
     price_euro = d.price_cent * 1.0 / 100.0
     s = f"""Discount {format_date(d.start)} - {format_date(d.end)}: {store_opt_start}{d.store}{store_opt_end}, {item.name}, {d.amount}{item.unit}, {price_euro:.2f}€"""
+    # discount in percent
+    if r:
+        percent = -int(math.floor((1.0 - 1.0 * d.price_cent / r.price_cent) * 100.0))
+        s = s + f", {percent}%"
     return s
 
 
@@ -394,8 +399,6 @@ def i_discount_add(
         LAST_START, LAST_END, LAST_STORE, item.item_id, amount, price_cent
     )
 
-    CONSOLE.print(i_discount_format(discount))
-
     regular_item = None
     if regular is not None:
         regular_price = regular
@@ -408,6 +411,9 @@ def i_discount_add(
         regular_item = Regular(
             LAST_START, LAST_STORE, item.item_id, amount, regular_price
         )
+
+    CONSOLE.print(i_discount_format(discount, regular_item))
+    if regular_item:
         CONSOLE.print(i_regular_format(regular_item))
 
     res = input("Is this correct [yN]? ")
