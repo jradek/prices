@@ -15,6 +15,7 @@ pd.set_option("display.max_colwidth", None)
 
 CURRENT_DIR = Path(__file__).absolute().parent
 
+INFLATION_ADJUST_DATE = "2022-04-01"
 
 def write_javascript(offers_df: pd.DataFrame):
     fn = CURRENT_DIR / "page" / "current_offers_data.js"
@@ -95,6 +96,7 @@ JOIN (SELECT
     ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2) AS "min_price_per_serving"
   FROM discount d
   JOIN item i on i.id = d.item_id
+  WHERE d.start >= "{INFLATION_ADJUST_DATE}"
   GROUP BY i.id
   HAVING MIN(ROUND(i.serving_size * d.price_cent * 1.0 / d.amount / 100, 2))
 ) AS min_price
@@ -120,6 +122,7 @@ LEFT JOIN (
       price_cent,
       amount
     FROM regular
+    WHERE date >= "{INFLATION_ADJUST_DATE}"
     GROUP BY item_id, store
     HAVING MAX(date)
     ) AS r ON i.id = r.item_id
